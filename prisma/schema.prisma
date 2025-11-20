@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?  // Optional for OAuth users
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blogs Blog[]
+}
+
+model Blog {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  slug        String
+  description String?
+  blogId      String   @unique @default(uuid()) // UUID for API access
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts      Post[]
+  categories Category[]
+  tags       Tag[]
+  authors    Author[]
+
+  @@index([userId])
+  @@index([blogId])
+}
+
+model Post {
+  id              String   @id @default(cuid())
+  blogId          String
+  title           String
+  slug            String
+  content         Json     // Editor.js JSON format
+  excerpt         String?
+  coverImage      String?
+  status          String   @default("draft") // draft | published
+  publishedAt     DateTime?
+  authorId        String?
+
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  ogImage         String?
+  ogTitle         String?
+  ogDescription   String?
+  canonicalUrl    String?
+  keywords        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blog       Blog           @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  author     Author?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  categories PostCategory[]
+  tags       PostTag[]
+
+  @@unique([blogId, slug])
+  @@index([blogId])
+  @@index([blogId, status])
+  @@index([blogId, slug])
+  @@index([authorId])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  blogId      String
+  name        String
+  slug        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  blog  Blog          @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  posts PostCategory[]
+
+  @@unique([blogId, slug])
+  @@index([blogId])
+}
+
+model PostCategory {
+  id         String   @id @default(cuid())
+  postId     String
+  categoryId String
+
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, categoryId])
+  @@index([postId])
+  @@index([categoryId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  blogId    String
+  name      String
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blog  Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  posts PostTag[]
+
+  @@unique([blogId, slug])
+  @@index([blogId])
+}
+
+model PostTag {
+  id     String @id @default(cuid())
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+}
+
+model Author {
+  id          String   @id @default(cuid())
+  blogId      String
+  name        String
+  email       String
+  bio         String?
+  avatar      String?
+  slug        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  blog  Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  posts Post[]
+
+  @@unique([blogId, slug])
+  @@unique([blogId, email])
+  @@index([blogId])
+}

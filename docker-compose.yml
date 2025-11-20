@@ -1,0 +1,48 @@
+# docker-compose.yml para desarrollo local
+# Dokploy usa su propia configuración, pero esto es útil para testing
+
+version: '3.8'
+
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: zenex-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zenex
+      POSTGRES_PASSWORD: zenex_password
+      POSTGRES_DB: zenex_cms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zenex"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js App
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zenex-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://zenex:zenex_password@postgres:5432/zenex_cms?schema=public"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "dev-secret-change-in-production"
+      NODE_ENV: "production"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Correr migraciones antes de iniciar
+    command: sh -c "npx prisma migrate deploy && node server.js"
+
+volumes:
+  postgres_data:
+    driver: local

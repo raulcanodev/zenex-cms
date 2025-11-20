@@ -1,0 +1,51 @@
+# Ignorar archivos innecesarios para reducir tamaño de la imagen
+# Esto previene que se copien archivos que hacen crecer la DB de Docker
+
+# Dependencias
+node_modules
+npm-debug.log
+
+# Next.js
+.next/
+out/
+
+# Build
+dist
+build
+
+# Env files (no copiar secrets al build)
+.env
+.env*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+.nyc_output
+
+# Misc
+*.log
+.cache
+README.md
+LICENSE
+.eslintrc.json
+.prettierrc
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
