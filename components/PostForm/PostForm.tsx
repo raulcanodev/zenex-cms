@@ -23,6 +23,7 @@ import type { OutputData } from "@editorjs/editorjs";
 import { slugify } from "@/lib/slug";
 import { createPost, updatePost } from "@/src/server/services/posts/mutations";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { LanguageSelector } from "@/components/LanguageSelector/LanguageSelector";
 
 interface PostFormProps {
   blogId: string;
@@ -43,6 +44,7 @@ interface PostFormProps {
     ogDescription?: string | null;
     canonicalUrl?: string | null;
     keywords?: string | null;
+    language?: string | null;
     categories?: Array<{ categoryId: string }>;
     tags?: Array<{ tagId: string }>;
   };
@@ -80,6 +82,7 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
     post?.tags?.map((t) => t.tagId) || []
   );
   const [authorId, setAuthorId] = useState(post?.authorId || "");
+  const [language, setLanguage] = useState(post?.language || "en");
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -109,6 +112,7 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
       status,
       publishedAt: publishedAt ? new Date(publishedAt) : undefined,
       authorId: authorId || undefined,
+      language: language || "en",
       metaTitle: computedMetaTitle || undefined,
       metaDescription: computedMetaDescription || undefined,
       ogImage: computedOgImage || undefined,
@@ -225,6 +229,16 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Label className="text-muted-foreground w-[120px] shrink-0">Language</Label>
+            <LanguageSelector
+              value={language}
+              onValueChange={setLanguage}
+              required
+              className="w-auto max-w-md"
+            />
           </div>
 
           <div className="flex items-center gap-4">

@@ -1,12 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { getLanguageName } from "@/lib/languages";
 
 interface PostCardProps {
   id: string;
@@ -15,6 +9,7 @@ interface PostCardProps {
   publishedAt: Date | null;
   status: string;
   coverImage?: string | null;
+  language?: string | null;
 }
 
 export function PostCard({
@@ -24,6 +19,7 @@ export function PostCard({
   publishedAt,
   status,
   coverImage,
+  language,
 }: PostCardProps) {
   const formattedDate = publishedAt
     ? new Date(publishedAt).toLocaleDateString("en-US", {
@@ -32,6 +28,8 @@ export function PostCard({
         day: "numeric",
       })
     : null;
+
+  const languageName = language ? getLanguageName(language) : null;
 
   return (
     <Link href={`/dashboard/blogs/${blogId}/posts/${id}/edit`}>
@@ -62,7 +60,12 @@ export function PostCard({
           </div>
           <div className="flex-1">
             <h3 className="font-semibold">{title}</h3>
-            {formattedDate && <p className="text-sm text-muted-foreground">{formattedDate}</p>}
+            <div className="flex items-center gap-2">
+              {formattedDate && <p className="text-sm text-muted-foreground">{formattedDate}</p>}
+              {languageName && (
+                <span className="text-xs text-muted-foreground">• {languageName}</span>
+              )}
+            </div>
           </div>
           {status === "published" && (
             <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
@@ -74,4 +77,5 @@ export function PostCard({
     </Link>
   );
 }
+
 

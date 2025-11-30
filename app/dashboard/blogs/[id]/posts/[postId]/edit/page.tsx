@@ -55,6 +55,7 @@ export default async function EditPostPage({
             ogDescription: post.ogDescription,
             canonicalUrl: post.canonicalUrl,
             keywords: post.keywords,
+            language: post.language,
             categories: post.categories,
             tags: post.tags,
           }}

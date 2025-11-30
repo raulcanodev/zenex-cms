@@ -48,6 +48,7 @@ export default function PostApiDocsPage() {
     },
     "excerpt": "A short description",
     "coverImage": "https://example.com/image.jpg",
+    "language": "en",
     "publishedAt": "2024-01-01T00:00:00.000Z",
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z",

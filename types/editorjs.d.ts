@@ -8,3 +8,4 @@ declare module "@editorjs/image" {
   export default Image;
 }
 
+

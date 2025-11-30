@@ -20,12 +20,15 @@ export async function GET(
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const status = searchParams.get("status") || "published";
     const categoryId = searchParams.get("category") || undefined;
+    const languageParam = searchParams.get("language");
+    const language = languageParam && languageParam.trim() ? languageParam : undefined;
 
     const { posts, pagination } = await getPostsByBlogId(blog.id, {
       page,
       limit,
       status,
       categoryId,
+      language,
     });
 
     // Format response for API
@@ -35,6 +38,7 @@ export async function GET(
       slug: post.slug,
       excerpt: post.excerpt,
       coverImage: post.coverImage,
+      language: post.language,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,

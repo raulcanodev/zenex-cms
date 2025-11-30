@@ -5,6 +5,7 @@ import { getSession } from "@/lib/get-session";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import type { OutputData } from "@editorjs/editorjs";
+import { isValidLanguageCode } from "@/lib/languages";
 
 const createPostSchema = z.object({
   blogId: z.string(),
@@ -16,6 +17,9 @@ const createPostSchema = z.object({
   status: z.enum(["draft", "published"]).default("draft"),
   publishedAt: z.date().optional(),
   authorId: z.string().optional(),
+  language: z.string().refine((val) => isValidLanguageCode(val), {
+    message: "Invalid language code",
+  }),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   ogImage: z.string().optional(),
@@ -41,6 +45,7 @@ export async function createPost(data: {
   status?: "draft" | "published";
   publishedAt?: Date;
   authorId?: string;
+  language: string;
   metaTitle?: string;
   metaDescription?: string;
   ogImage?: string;
@@ -93,6 +98,7 @@ export async function createPost(data: {
         status: validated.status,
         publishedAt: validated.publishedAt,
         authorId: validated.authorId,
+        language: validated.language,
         metaTitle: validated.metaTitle,
         metaDescription: validated.metaDescription,
         ogImage: validated.ogImage,
@@ -138,6 +144,7 @@ export async function updatePost(
     status?: "draft" | "published";
     publishedAt?: Date;
     authorId?: string;
+    language?: string;
     metaTitle?: string;
     metaDescription?: string;
     ogImage?: string;
@@ -170,6 +177,11 @@ export async function updatePost(
       blogId: post.blogId,
       ...data,
     });
+
+    // Validate language code if provided
+    if (validated.language && !isValidLanguageCode(validated.language)) {
+      return { error: "Invalid language code" };
+    }
 
     // Check slug uniqueness if updating slug
     if (validated.slug && validated.slug !== post.slug) {
@@ -214,6 +226,7 @@ export async function updatePost(
             ? validated.publishedAt || new Date()
             : validated.publishedAt,
         authorId: validated.authorId,
+        language: validated.language,
         metaTitle: validated.metaTitle,
         metaDescription: validated.metaDescription,
         ogImage: validated.ogImage,

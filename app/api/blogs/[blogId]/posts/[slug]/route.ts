@@ -28,6 +28,7 @@ export async function GET(
       content: post.content,
       excerpt: post.excerpt,
       coverImage: post.coverImage,
+      language: post.language,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,

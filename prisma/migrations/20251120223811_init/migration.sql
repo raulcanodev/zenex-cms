@@ -35,7 +35,7 @@ CREATE TABLE "Post" (
     "coverImage" TEXT,
     "status" TEXT NOT NULL DEFAULT 'draft',
     "publishedAt" TIMESTAMP(3),
-    "authorId" TEXT NOT NULL,
+    "authorId" TEXT,
     "metaTitle" TEXT,
     "metaDescription" TEXT,
     "ogImage" TEXT,
@@ -92,6 +92,21 @@ CREATE TABLE "PostTag" (
     CONSTRAINT "PostTag_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Author" (
+    "id" TEXT NOT NULL,
+    "blogId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "bio" TEXT,
+    "avatar" TEXT,
+    "slug" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Author_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -112,6 +127,9 @@ CREATE INDEX "Post_blogId_status_idx" ON "Post"("blogId", "status");
 
 -- CreateIndex
 CREATE INDEX "Post_blogId_slug_idx" ON "Post"("blogId", "slug");
+
+-- CreateIndex
+CREATE INDEX "Post_authorId_idx" ON "Post"("authorId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Post_blogId_slug_key" ON "Post"("blogId", "slug");
@@ -146,11 +164,23 @@ CREATE INDEX "PostTag_tagId_idx" ON "PostTag"("tagId");
 -- CreateIndex
 CREATE UNIQUE INDEX "PostTag_postId_tagId_key" ON "PostTag"("postId", "tagId");
 
+-- CreateIndex
+CREATE INDEX "Author_blogId_idx" ON "Author"("blogId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Author_blogId_slug_key" ON "Author"("blogId", "slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Author_blogId_email_key" ON "Author"("blogId", "email");
+
 -- AddForeignKey
 ALTER TABLE "Blog" ADD CONSTRAINT "Blog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_blogId_fkey" FOREIGN KEY ("blogId") REFERENCES "Blog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "Author"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Category" ADD CONSTRAINT "Category_blogId_fkey" FOREIGN KEY ("blogId") REFERENCES "Blog"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -169,3 +199,6 @@ ALTER TABLE "PostTag" ADD CONSTRAINT "PostTag_postId_fkey" FOREIGN KEY ("postId"
 
 -- AddForeignKey
 ALTER TABLE "PostTag" ADD CONSTRAINT "PostTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "Tag"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Author" ADD CONSTRAINT "Author_blogId_fkey" FOREIGN KEY ("blogId") REFERENCES "Blog"("id") ON DELETE CASCADE ON UPDATE CASCADE;

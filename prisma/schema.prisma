@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -51,6 +52,7 @@ model Post {
   status          String   @default("draft") // draft | published
   publishedAt     DateTime?
   authorId        String?
+  language        String   @default("en") // ISO 639-1 language code
 
   // SEO fields
   metaTitle       String?
@@ -73,6 +75,7 @@ model Post {
   @@index([blogId])
   @@index([blogId, status])
   @@index([blogId, slug])
+  @@index([blogId, language])
   @@index([authorId])
 }
 

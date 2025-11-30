@@ -6,6 +6,7 @@ export async function getPostsByBlogId(
   options?: {
     status?: string;
     categoryId?: string;
+    language?: string;
     page?: number;
     limit?: number;
   }
@@ -17,6 +18,7 @@ export async function getPostsByBlogId(
   const where: {
     blogId: string;
     status?: string;
+    language?: string;
     categories?: {
       some: {
         categoryId: string;
@@ -28,6 +30,10 @@ export async function getPostsByBlogId(
 
   if (options?.status) {
     where.status = options.status;
+  }
+
+  if (options?.language) {
+    where.language = options.language;
   }
 
   if (options?.categoryId) {
@@ -121,4 +127,5 @@ export async function getPostBySlug(blogId: string, slug: string) {
     }
   )();
 }
+
 

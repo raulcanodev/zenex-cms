@@ -70,6 +70,7 @@ export default async function BlogPostsPage({
               publishedAt={post.publishedAt}
               status={post.status}
               coverImage={post.coverImage}
+              language={post.language}
             />
           ))}
         </div>
