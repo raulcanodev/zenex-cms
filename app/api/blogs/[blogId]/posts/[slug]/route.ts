@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
 import { getPostBySlug } from "@/src/server/services/posts/queries";
+import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 export async function GET(
   request: NextRequest,
@@ -26,6 +27,7 @@ export async function GET(
       title: post.title,
       slug: post.slug,
       content: post.content,
+      html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
       excerpt: post.excerpt,
       coverImage: post.coverImage,
       language: post.language,

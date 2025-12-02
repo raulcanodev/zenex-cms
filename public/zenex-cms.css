@@ -1,0 +1,179 @@
+/* Zenex CMS Default Styles */
+
+.zenex-cms__header {
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 1.5rem 0 1rem;
+  color: inherit;
+}
+
+.zenex-cms__h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.zenex-cms__h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.zenex-cms__h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.zenex-cms__h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.zenex-cms__paragraph {
+  font-size: 1rem;
+  line-height: 1.75;
+  margin: 0.75rem 0;
+  color: inherit;
+}
+
+.zenex-cms__list {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.zenex-cms__list-item {
+  margin: 0.25rem 0;
+  line-height: 1.75;
+}
+
+.zenex-cms__list--unordered {
+  list-style-type: disc;
+}
+
+.zenex-cms__list--ordered {
+  list-style-type: decimal;
+}
+
+.zenex-cms__quote {
+  border-left: 4px solid currentColor;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.zenex-cms__quote-text {
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
+}
+
+.zenex-cms__quote-caption {
+  display: block;
+  font-size: 0.875rem;
+  font-style: normal;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.zenex-cms__code-block {
+  background-color: #111827; /* Dark background always looks professional for code */
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  border: 1px solid #374151;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.zenex-cms__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #e5e7eb; /* Light text color */
+  display: block;
+}
+
+.zenex-cms__image-figure {
+  margin: 1.5rem 0;
+}
+
+.zenex-cms__image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  display: block;
+}
+
+.zenex-cms__image-caption {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.zenex-cms__link-tool {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  transition: background-color 0.2s;
+}
+
+.zenex-cms__link-tool:hover {
+  background-color: #f9fafb;
+}
+
+.zenex-cms__link-tool-anchor {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem;
+}
+
+.zenex-cms__link-tool-image {
+  width: 100%;
+  height: 12rem;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.zenex-cms__link-tool-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  margin-top: 0;
+}
+
+.zenex-cms__link-tool-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.zenex-cms__link-tool-url {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: block;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  /* Code block styles are shared (always dark) for consistency */
+  
+  .zenex-cms__image-caption {
+    color: #9ca3af;
+  }
+
+  .zenex-cms__link-tool {
+    border-color: #374151;
+  }
+
+  .zenex-cms__link-tool:hover {
+    background-color: #1f2937;
+  }
+
+  .zenex-cms__link-tool-description,
+  .zenex-cms__link-tool-url {
+    color: #9ca3af;
+  }
+}
+

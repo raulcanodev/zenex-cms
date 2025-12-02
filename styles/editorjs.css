@@ -1,0 +1,232 @@
+/* Editor.js Block Styles */
+
+/* Headers - Target the contenteditable element */
+.codex-editor .ce-header {
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  margin: 0 0 1rem !important; /* Removed top margin to align with toolbar */
+}
+
+.codex-editor h1.ce-header {
+  font-size: 2.25rem !important; /* 36px */
+  font-weight: 800 !important;
+}
+
+.codex-editor h2.ce-header {
+  font-size: 1.875rem !important; /* 30px */
+  font-weight: 700 !important;
+}
+
+.codex-editor h3.ce-header {
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 600 !important;
+}
+
+.codex-editor h4.ce-header {
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 600 !important;
+}
+
+/* Paragraphs */
+.codex-editor .ce-paragraph {
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+  margin: 0 0 0.75rem !important; /* Removed top margin */
+  color: rgb(var(--foreground)) !important;
+}
+
+/* Placeholder styling */
+.codex-editor .ce-paragraph[data-placeholder]:empty::before,
+.codex-editor .ce-header[data-placeholder]:empty::before {
+  color: rgb(var(--muted-foreground)) !important;
+  opacity: 0.5 !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  font-size: 1rem !important;
+}
+
+/* Lists */
+.codex-editor .cdx-list {
+  margin: 0.75rem 0 !important;
+  padding-left: 1.5rem !important;
+}
+
+.codex-editor .cdx-list__item {
+  margin: 0.25rem 0 !important;
+  line-height: 1.75 !important;
+  color: rgb(var(--foreground)) !important;
+}
+
+.codex-editor .cdx-list--unordered .cdx-list__item {
+  list-style-type: disc !important;
+}
+
+.codex-editor .cdx-list--ordered .cdx-list__item {
+  list-style-type: decimal !important;
+}
+
+/* Quotes */
+.codex-editor .cdx-quote {
+  border-left: 4px solid rgb(var(--primary)) !important;
+  padding: 0.5rem 0 0.5rem 1rem !important;
+  margin: 1rem 0 !important;
+  font-style: italic !important;
+  color: rgb(var(--muted-foreground)) !important;
+}
+
+.codex-editor .cdx-quote__text {
+  margin-bottom: 0.5rem !important;
+  line-height: 1.75 !important;
+  font-size: 1rem !important;
+}
+
+.codex-editor .cdx-quote__caption {
+  font-size: 0.875rem !important;
+  font-style: normal !important;
+  color: rgb(var(--muted-foreground)) !important;
+  margin-top: 0.5rem !important;
+}
+
+/* Code blocks */
+.codex-editor .cdx-block.ce-code {
+  background-color: rgb(var(--muted)) !important;
+  border-radius: 0.375rem !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+}
+
+.codex-editor .ce-code__textarea {
+  font-family: var(--font-mono), monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  color: rgb(var(--foreground)) !important;
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  resize: none !important;
+  outline: none !important;
+  min-height: 100px !important;
+}
+
+/* Images */
+.codex-editor .image-tool {
+  margin: 1.5rem 0 !important;
+}
+
+.codex-editor .image-tool__image {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 0.5rem !important;
+}
+
+.codex-editor .image-tool__caption {
+  font-size: 0.875rem !important;
+  color: rgb(var(--muted-foreground)) !important;
+  text-align: center !important;
+  margin-top: 0.5rem !important;
+  padding: 0.5rem !important;
+}
+
+/* Link Tool */
+.codex-editor .link-tool {
+  border: 1px solid rgb(var(--border)) !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+  transition: background-color 0.2s !important;
+}
+
+.codex-editor .link-tool:hover {
+  background-color: rgb(var(--muted) / 0.5) !important;
+}
+
+.codex-editor .link-tool__image {
+  width: 100% !important;
+  max-height: 12rem !important;
+  object-fit: cover !important;
+  border-radius: 0.375rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.codex-editor .link-tool__title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  color: rgb(var(--foreground)) !important;
+}
+
+.codex-editor .link-tool__description {
+  font-size: 0.875rem !important;
+  color: rgb(var(--muted-foreground)) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.codex-editor .link-tool__anchor {
+  font-size: 0.75rem !important;
+  color: rgb(var(--muted-foreground)) !important;
+}
+
+/* Block wrapper */
+.codex-editor .ce-block {
+  margin: 0.75rem 0 !important; /* Increased vertical spacing between blocks */
+  padding: 0.25rem 0 !important;
+}
+
+.codex-editor .ce-block__content {
+  max-width: 100% !important;
+}
+
+/* Main editor container - add padding to prevent overlap with toolbar */
+.codex-editor .codex-editor__redactor {
+  padding-left: 4rem !important;
+  padding-right: 2rem !important;
+}
+
+/* Toolbar positioning */
+.codex-editor .ce-toolbar__actions {
+  left: -3.5rem !important; /* Position inside the left padding */
+  right: auto !important;
+  padding-right: 0 !important;
+  /* Removed top: 0 !important to allow dynamic vertical positioning */
+}
+
+.codex-editor .ce-toolbar__plus,
+.codex-editor .ce-toolbar__settings-btn {
+  color: rgb(var(--muted-foreground)) !important;
+}
+
+.codex-editor .ce-toolbar__plus:hover,
+.codex-editor .ce-toolbar__settings-btn:hover {
+  color: rgb(var(--foreground)) !important;
+}
+
+/* Focus state */
+.codex-editor .ce-block--focused {
+  background-color: transparent !important;
+}
+
+/* Hide Checklist tool if present */
+.codex-editor .ce-popover__item[data-item-name="checklist"],
+.codex-editor .ce-toolbox__button[data-tool="checklist"],
+.codex-editor .ce-inline-tool[data-tool="checklist"],
+.codex-editor .ce-conversion-tool__icon[data-tool="checklist"] {
+  display: none !important;
+}
+
+/* Dark mode adjustments */
+.dark .codex-editor .cdx-block.ce-code {
+  background-color: rgb(var(--muted) / 0.3) !important;
+}
+
+.dark .codex-editor .cdx-quote {
+  border-left-color: rgb(var(--primary)) !important;
+}
+
+.dark .codex-editor .link-tool {
+  border-color: rgb(var(--border)) !important;
+}
+
+.dark .codex-editor .link-tool:hover {
+  background-color: rgb(var(--muted) / 0.3) !important;
+}
+

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
 import { getPostsByBlogId } from "@/src/server/services/posts/queries";
+import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +19,8 @@ export async function GET(
 
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const status = searchParams.get("status") || "published";
+    const statusParam = searchParams.get("status");
+    const status = statusParam || undefined; // undefined = all posts, "published" = only published, "draft" = only drafts
     const categoryId = searchParams.get("category") || undefined;
     const languageParam = searchParams.get("language");
     const language = languageParam && languageParam.trim() ? languageParam : undefined;
@@ -36,6 +38,8 @@ export async function GET(
       id: post.id,
       title: post.title,
       slug: post.slug,
+      content: post.content, // Include content for testing/example purposes
+      html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
       excerpt: post.excerpt,
       coverImage: post.coverImage,
       language: post.language,

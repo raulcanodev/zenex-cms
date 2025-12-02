@@ -47,6 +47,7 @@ export default function PostsApiDocsPage() {
       "excerpt": "A short description of the post",
       "coverImage": "https://example.com/image.jpg",
       "language": "en",
+      "html": "<p class=\\"zenex-cms__paragraph\\">A short description of the post</p>",
       "publishedAt": "2024-01-01T00:00:00.000Z",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
@@ -97,7 +98,10 @@ const res = await fetch(
 const { data: posts, pagination } = await res.json();
 
 console.log(\`Total posts: \${pagination.total}\`);
-console.log(\`Total pages: \${pagination.totalPages}\`);`}
+console.log(\`Total pages: \${pagination.totalPages}\`);
+
+// Render content using post.html
+// See "GET Single Post" documentation for styling instructions.`}
               filename="example.ts"
             />
           </DocsSection>
