@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { userHasAccessToBlog } from "./members/mutations";
 
 const createBlogSchema = z.object({
   name: z.string().min(1),
