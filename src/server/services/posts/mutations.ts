@@ -401,7 +401,7 @@ export async function translatePost(postId: string, targetLanguage: string) {
 
     // Translate content
     const translatedContent = await translationService.translatePostContent(
-      originalPost.content as OutputData,
+      originalPost.content as unknown as OutputData,
       targetLanguage,
       originalPost.language
     );
@@ -470,7 +470,7 @@ export async function translatePost(postId: string, targetLanguage: string) {
         blogId: originalPost.blogId,
         title: translatedTitle,
         slug: originalPost.slug, // Same slug, different language
-        content: translatedContent,
+        content: translatedContent as any,
         excerpt: translatedExcerpt,
         coverImage: originalPost.coverImage, // Keep same image
         status: originalPost.status,
@@ -611,7 +611,7 @@ export async function syncPostTranslations(postId: string) {
         try {
           // Translate the content from current post to the translation's language
           const translatedContent = await translationService.translatePostContent(
-            currentPost.content as OutputData,
+            currentPost.content as unknown as OutputData,
             translation.language,
             currentPost.language
           );
@@ -638,7 +638,7 @@ export async function syncPostTranslations(postId: string) {
           const updatedPost = await prisma.post.update({
             where: { id: translation.id },
             data: {
-              content: translatedContent,
+              content: translatedContent as any,
               // Sync non-language-specific fields
               coverImage: currentPost.coverImage,
               ogImage: currentPost.ogImage,

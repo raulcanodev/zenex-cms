@@ -46,16 +46,16 @@ export async function GET(
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      categories: post.categories.map((pc) => ({
+      categories: post.categories?.map((pc: any) => ({
         id: pc.category.id,
         name: pc.category.name,
         slug: pc.category.slug,
-      })),
-      tags: post.tags.map((pt) => ({
+      })) || [],
+      tags: post.tags?.map((pt: any) => ({
         id: pt.tag.id,
         name: pt.tag.name,
         slug: pt.tag.slug,
-      })),
+      })) || [],
       // SEO fields
       metaTitle: post.metaTitle,
       metaDescription: post.metaDescription,

@@ -100,12 +100,11 @@ export async function getPostById(id: string) {
 export async function getPostBySlug(blogId: string, slug: string) {
   return unstable_cache(
     async () => {
-      return prisma.post.findUnique({
+      return prisma.post.findFirst({
         where: {
-          blogId_slug: {
-            blogId,
-            slug,
-          },
+          blogId,
+          slug,
+          status: "published",
         },
         include: {
           categories: {
@@ -118,6 +117,9 @@ export async function getPostBySlug(blogId: string, slug: string) {
               tag: true,
             },
           },
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
     },
