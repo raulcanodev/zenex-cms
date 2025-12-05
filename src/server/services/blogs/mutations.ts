@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { userHasAccessToBlog } from "./members/mutations";
 
 const createBlogSchema = z.object({
   name: z.string().min(1),
@@ -75,13 +76,17 @@ export async function updateBlog(
   try {
     const validated = updateBlogSchema.partial().parse(data);
 
-    // Check ownership
+    // Check ownership (only owner can update blog)
     const blog = await prisma.blog.findUnique({
       where: { id },
     });
 
-    if (!blog || blog.userId !== session.user.id) {
-      return { error: "Unauthorized" };
+    if (!blog) {
+      return { error: "Blog not found" };
+    }
+
+    if (blog.userId !== session.user.id) {
+      return { error: "Unauthorized: Only the blog owner can update the blog" };
     }
 
     // Check slug uniqueness if updating slug
@@ -126,8 +131,13 @@ export async function deleteBlog(id: string) {
       where: { id },
     });
 
-    if (!blog || blog.userId !== session.user.id) {
-      return { error: "Unauthorized" };
+    if (!blog) {
+      return { error: "Blog not found" };
+    }
+
+    // Only owner can delete blog
+    if (blog.userId !== session.user.id) {
+      return { error: "Unauthorized: Only the blog owner can delete the blog" };
     }
 
     await prisma.blog.delete({

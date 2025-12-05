@@ -13,7 +13,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String?  // Optional for OAuth users
+  password  String? // Optional for OAuth users
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -31,28 +31,30 @@ model Blog {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   posts      Post[]
   categories Category[]
   tags       Tag[]
   authors    Author[]
+  members    BlogMember[]
 
   @@index([userId])
   @@index([blogId])
 }
 
 model Post {
-  id              String   @id @default(cuid())
-  blogId          String
-  title           String
-  slug            String
-  content         Json     // Editor.js JSON format
-  excerpt         String?
-  coverImage      String?
-  status          String   @default("draft") // draft | published
-  publishedAt     DateTime?
-  authorId        String?
-  language        String   @default("en") // ISO 639-1 language code
+  id                 String    @id @default(cuid())
+  blogId             String
+  title              String
+  slug               String
+  content            Json // Editor.js JSON format
+  excerpt            String?
+  coverImage         String?
+  status             String    @default("draft") // draft | published
+  publishedAt        DateTime?
+  authorId           String?
+  language           String    @default("en") // ISO 639-1 language code
+  translationGroupId String? // UUID to group translations of the same post
 
   // SEO fields
   metaTitle       String?
@@ -71,12 +73,13 @@ model Post {
   categories PostCategory[]
   tags       PostTag[]
 
-  @@unique([blogId, slug])
+  @@unique([blogId, slug, language])
   @@index([blogId])
   @@index([blogId, status])
   @@index([blogId, slug])
   @@index([blogId, language])
   @@index([authorId])
+  @@index([translationGroupId])
 }
 
 model Category {
@@ -88,7 +91,7 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  blog  Blog          @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog  Blog           @relation(fields: [blogId], references: [id], onDelete: Cascade)
   posts PostCategory[]
 
   @@unique([blogId, slug])
@@ -96,7 +99,7 @@ model Category {
 }
 
 model PostCategory {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   postId     String
   categoryId String
 
@@ -116,7 +119,7 @@ model Tag {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  blog  Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  blog  Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
   posts PostTag[]
 
   @@unique([blogId, slug])
@@ -137,15 +140,15 @@ model PostTag {
 }
 
 model Author {
-  id          String   @id @default(cuid())
-  blogId      String
-  name        String
-  email       String
-  bio         String?
-  avatar      String?
-  slug        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  blogId    String
+  name      String
+  email     String
+  bio       String?
+  avatar    String?
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   blog  Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
   posts Post[]
@@ -153,4 +156,18 @@ model Author {
   @@unique([blogId, slug])
   @@unique([blogId, email])
   @@index([blogId])
+}
+
+model BlogMember {
+  id        String   @id @default(cuid())
+  blogId    String
+  userEmail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([blogId, userEmail])
+  @@index([blogId])
+  @@index([userEmail])
 }

@@ -10,6 +10,7 @@ interface PostCardProps {
   status: string;
   coverImage?: string | null;
   language?: string | null;
+  availableLanguages?: string[];
 }
 
 export function PostCard({
@@ -20,6 +21,7 @@ export function PostCard({
   status,
   coverImage,
   language,
+  availableLanguages,
 }: PostCardProps) {
   const formattedDate = publishedAt
     ? new Date(publishedAt).toLocaleDateString("en-US", {
@@ -60,10 +62,29 @@ export function PostCard({
           </div>
           <div className="flex-1">
             <h3 className="font-semibold">{title}</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {formattedDate && <p className="text-sm text-muted-foreground">{formattedDate}</p>}
               {languageName && (
                 <span className="text-xs text-muted-foreground">• {languageName}</span>
+              )}
+              {availableLanguages && availableLanguages.length > 1 && (
+                <div className="flex flex-wrap items-center gap-1">
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <div className="flex flex-wrap gap-1">
+                    {availableLanguages.map((lang) => (
+                      <span
+                        key={lang}
+                        className={`rounded-full px-2 py-0.5 text-xs ${
+                          lang === language
+                            ? "bg-primary/20 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {getLanguageName(lang) || lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>

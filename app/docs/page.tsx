@@ -95,12 +95,30 @@ export default function DocsPage() {
             </DocsSection>
 
             <DocsSection id="features" title="Key Features">
+              <p className="mb-4 text-muted-foreground">
+                Explore additional features:
+              </p>
+              <div className="space-y-3 mb-6">
+                <Link
+                  href="/docs/members"
+                  className="block rounded-lg border p-4 hover:border-foreground transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">Blog Members</span>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Manage blog access by adding members via email. Members can access and edit the blog.
+                  </p>
+                </Link>
+              </div>
               <ul className="space-y-2 text-muted-foreground">
                 <li>• <strong>No authentication</strong> - Public API using Blog ID</li>
                 <li>• <strong>Pagination</strong> - Built-in pagination support</li>
                 <li>• <strong>Rich content</strong> - Editor.js format for flexible content</li>
                 <li>• <strong>SEO ready</strong> - Meta tags and Open Graph included</li>
                 <li>• <strong>Categories & Tags</strong> - Organize your content</li>
+                <li>• <strong>Multi-language support</strong> - Translate posts to multiple languages</li>
+                <li>• <strong>Team collaboration</strong> - Add members to collaborate on blogs</li>
               </ul>
             </DocsSection>
           </div>

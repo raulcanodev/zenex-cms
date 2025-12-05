@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/get-session";
 import { getBlogById } from "@/src/server/services/blogs/queries";
+import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
 import { getAuthorsByBlogId } from "@/src/server/services/authors/queries";
 import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { BlogNavigation } from "@/components/BlogNavigation/BlogNavigation";
@@ -23,7 +24,17 @@ export default async function BlogAuthorsPage({
   const { id } = await params;
   const blog = await getBlogById(id);
 
-  if (!blog || blog.userId !== session?.user?.id) {
+  if (!blog) {
+    redirect("/dashboard");
+  }
+
+  const hasAccess = await userHasAccessToBlog(
+    session?.user?.id || "",
+    session?.user?.email || "",
+    id
+  );
+
+  if (!hasAccess) {
     redirect("/dashboard");
   }
 

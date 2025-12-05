@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/get-session";
 import { getBlogById } from "@/src/server/services/blogs/queries";
-import { getPostById } from "@/src/server/services/posts/queries";
+import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
+import { getPostById, getPostsByTranslationGroup } from "@/src/server/services/posts/queries";
 import { getCategoriesByBlogId } from "@/src/server/services/categories/queries";
 import { getTagsByBlogId } from "@/src/server/services/tags/queries";
 import { getAuthorsByBlogId } from "@/src/server/services/authors/queries";
@@ -19,13 +20,36 @@ export default async function EditPostPage({
   const blog = await getBlogById(id);
   const post = await getPostById(postId);
 
-  if (!blog || blog.userId !== session?.user?.id) {
+  if (!blog) {
+    redirect("/dashboard");
+  }
+
+  const hasAccess = await userHasAccessToBlog(
+    session?.user?.id || "",
+    session?.user?.email || "",
+    id
+  );
+
+  if (!hasAccess) {
     redirect("/dashboard");
   }
 
   if (!post || post.blogId !== id) {
     redirect(`/dashboard/blogs/${id}`);
   }
+
+  // Get existing translations if post has a translationGroupId
+  const existingTranslations = post.translationGroupId
+    ? await getPostsByTranslationGroup(post.translationGroupId)
+    : [];
+
+  // Filter out the current post from translations and map to the format needed
+  const translations = existingTranslations
+    .filter((t) => t.id !== post.id)
+    .map((t) => ({
+      id: t.id,
+      language: t.language,
+    }));
 
   const [categories, tags, authors] = await Promise.all([
     getCategoriesByBlogId(id),
@@ -62,6 +86,7 @@ export default async function EditPostPage({
           categories={categories}
           tags={tags}
           authors={authors}
+          existingTranslations={translations}
         />
       </main>
     </div>

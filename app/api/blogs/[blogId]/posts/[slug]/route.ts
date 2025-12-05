@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
-import { getPostBySlug } from "@/src/server/services/posts/queries";
+import { getPostBySlug, getPostBySlugAndLanguage, getAvailableLanguagesBySlug } from "@/src/server/services/posts/queries";
 import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 export async function GET(
@@ -9,6 +9,8 @@ export async function GET(
 ) {
   try {
     const { blogId, slug } = await params;
+    const { searchParams } = new URL(request.url);
+    const languageParam = searchParams.get("language");
 
     // Verify blog exists
     const blog = await getBlogByBlogId(blogId);
@@ -16,10 +18,20 @@ export async function GET(
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    const post = await getPostBySlug(blog.id, slug);
+    // Get post by language if specified, otherwise get default
+    let post;
+    if (languageParam && languageParam.trim()) {
+      post = await getPostBySlugAndLanguage(blog.id, slug, languageParam);
+    } else {
+      post = await getPostBySlug(blog.id, slug);
+    }
+
     if (!post || post.status !== "published") {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
+
+    // Get available languages for this post
+    const availableLanguages = await getAvailableLanguagesBySlug(blog.id, slug);
 
     // Format response for API
     const formattedPost = {
@@ -52,6 +64,7 @@ export async function GET(
       ogDescription: post.ogDescription,
       canonicalUrl: post.canonicalUrl,
       keywords: post.keywords,
+      availableLanguages,
     };
 
     return NextResponse.json({

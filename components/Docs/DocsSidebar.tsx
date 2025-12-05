@@ -28,6 +28,12 @@ const navigation: NavItem[] = [
       { title: "GET Tags", href: "/docs/api/tags" },
     ],
   },
+  {
+    title: "Features",
+    items: [
+      { title: "Blog Members", href: "/docs/members" },
+    ],
+  },
 ];
 
 export function DocsSidebar() {

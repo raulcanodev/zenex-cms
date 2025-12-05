@@ -155,6 +155,36 @@
   display: block;
 }
 
+/* Links within zenex-cms content */
+.zenex-cms__paragraph a,
+.zenex-cms__list-item a,
+.zenex-cms__quote-text a,
+.zenex-cms__header a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s;
+}
+
+.zenex-cms__paragraph a:hover,
+.zenex-cms__list-item a:hover,
+.zenex-cms__quote-text a:hover,
+.zenex-cms__header a:hover {
+  opacity: 0.8;
+}
+
+/* General link class for any <a> with zenex-cms class */
+a.zenex-cms__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s;
+}
+
+a.zenex-cms__link:hover {
+  opacity: 0.8;
+}
+
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   /* Code block styles are shared (always dark) for consistency */
@@ -174,6 +204,14 @@
   .zenex-cms__link-tool-description,
   .zenex-cms__link-tool-url {
     color: #9ca3af;
+  }
+
+  .zenex-cms__paragraph a,
+  .zenex-cms__list-item a,
+  .zenex-cms__quote-text a,
+  .zenex-cms__header a,
+  a.zenex-cms__link {
+    color: inherit;
   }
 }
 

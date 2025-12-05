@@ -128,4 +128,136 @@ export async function getPostBySlug(blogId: string, slug: string) {
   )();
 }
 
+/**
+ * Get all posts that belong to the same translation group
+ */
+export async function getPostsByTranslationGroup(translationGroupId: string) {
+  return prisma.post.findMany({
+    where: {
+      translationGroupId,
+    },
+    include: {
+      categories: {
+        include: {
+          category: true,
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+}
+
+/**
+ * Get a post by slug and specific language
+ */
+export async function getPostBySlugAndLanguage(
+  blogId: string,
+  slug: string,
+  language: string
+) {
+  return unstable_cache(
+    async () => {
+      return prisma.post.findFirst({
+        where: {
+          blogId,
+          slug,
+          language,
+        },
+        include: {
+          categories: {
+            include: {
+              category: true,
+            },
+          },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      });
+    },
+    [`post-${blogId}-${slug}-${language}`],
+    {
+      revalidate: 3600,
+    }
+  )();
+}
+
+/**
+ * Get available languages for a post by its ID (using translationGroupId)
+ */
+export async function getAvailableLanguagesForPost(postId: string): Promise<string[]> {
+  const post = await prisma.post.findUnique({
+    where: { id: postId },
+    select: { translationGroupId: true },
+  });
+
+  if (!post || !post.translationGroupId) {
+    // If post doesn't have a translation group, return only its own language
+    const singlePost = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { language: true },
+    });
+    return singlePost?.language ? [singlePost.language] : [];
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      translationGroupId: post.translationGroupId,
+    },
+    select: {
+      language: true,
+    },
+  });
+
+  return posts.map((p) => p.language).filter(Boolean);
+}
+
+/**
+ * Get available languages for a post by slug (using translationGroupId)
+ */
+export async function getAvailableLanguagesBySlug(
+  blogId: string,
+  slug: string
+): Promise<string[]> {
+  const post = await prisma.post.findFirst({
+    where: {
+      blogId,
+      slug,
+    },
+    select: {
+      translationGroupId: true,
+      language: true,
+    },
+  });
+
+  if (!post) {
+    return [];
+  }
+
+  if (!post.translationGroupId) {
+    // If post doesn't have a translation group, return only its own language
+    return post.language ? [post.language] : [];
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      translationGroupId: post.translationGroupId,
+    },
+    select: {
+      language: true,
+    },
+  });
+
+  return posts.map((p) => p.language).filter(Boolean);
+}
+
 

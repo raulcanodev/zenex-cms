@@ -9,7 +9,10 @@ import { CreateBlogDialog } from "@/components/CreateBlogDialog/CreateBlogDialog
 
 export default async function DashboardPage() {
   const session = await getSession();
-  const blogs = await getBlogsByUserId(session?.user?.id || "");
+  const blogs = await getBlogsByUserId(
+    session?.user?.id || "",
+    session?.user?.email
+  );
 
   return (
     <div className="min-h-screen bg-background">

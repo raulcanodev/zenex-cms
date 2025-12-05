@@ -21,9 +21,11 @@ import {
 } from "@/components/ui/select";
 import type { OutputData } from "@editorjs/editorjs";
 import { slugify } from "@/lib/slug";
-import { createPost, updatePost } from "@/src/server/services/posts/mutations";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { createPost, updatePost, syncPostTranslations } from "@/src/server/services/posts/mutations";
+import { ChevronDown, ChevronUp, Languages, RefreshCw } from "lucide-react";
 import { LanguageSelector } from "@/components/LanguageSelector/LanguageSelector";
+import { TranslatePostDialog } from "@/components/TranslatePostDialog/TranslatePostDialog";
+import { getLanguageByCode } from "@/lib/languages";
 
 interface PostFormProps {
   blogId: string;
@@ -51,9 +53,10 @@ interface PostFormProps {
   categories: Array<{ id: string; name: string }>;
   tags: Array<{ id: string; name: string }>;
   authors: Array<{ id: string; name: string }>;
+  existingTranslations?: Array<{ id: string; language: string }>;
 }
 
-export function PostForm({ blogId, post, categories, tags, authors }: PostFormProps) {
+export function PostForm({ blogId, post, categories, tags, authors, existingTranslations = [] }: PostFormProps) {
   const router = useRouter();
   const isEditing = !!post;
 
@@ -85,9 +88,12 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
   const [language, setLanguage] = useState(post?.language || "en");
 
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [autoSlug, setAutoSlug] = useState(!post?.slug);
+  const [translateDialogOpen, setTranslateDialogOpen] = useState(false);
 
   // Compute derived values
   const computedSlug = autoSlug && title ? slugify(title) : slug;
@@ -137,15 +143,82 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
     }
   }
 
+  async function handleSync() {
+    if (!post?.id) return;
+
+    setError("");
+    setSuccessMessage("");
+    setIsSyncing(true);
+
+    try {
+      const result = await syncPostTranslations(post.id);
+
+      if (result.error) {
+        setError(result.error);
+        setIsSyncing(false);
+      } else {
+        // Success - show success message and refresh
+        const count = result.syncedCount || 0;
+        const total = result.totalCount || 0;
+        
+        if (count === total) {
+          setSuccessMessage(`Successfully synced ${count} translation${count !== 1 ? "s" : ""}`);
+        } else {
+          setSuccessMessage(
+            `Synced ${count} of ${total} translation${total !== 1 ? "s" : ""}${result.warnings ? ". Some translations failed." : ""}`
+          );
+          if (result.warnings) {
+            setError(result.warnings);
+          }
+        }
+        setIsSyncing(false);
+        
+        // Refresh after a short delay to show the success message
+        setTimeout(() => {
+          router.refresh();
+        }, 1500);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to sync translations");
+      setSuccessMessage("");
+      setIsSyncing(false);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="flex items-center justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isEditing ? "Update" : "Save"}
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {isEditing && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setTranslateDialogOpen(true)}
+            >
+              <Languages className="mr-2 h-4 w-4" />
+              Translate
+            </Button>
+          )}
+          {isEditing && existingTranslations && existingTranslations.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSync}
+              disabled={isSyncing || isLoading}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+              Sync
+            </Button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={() => router.push(`/dashboard/blogs/${blogId}`)}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading || isSyncing}>
+            {isEditing ? "Update" : "Save"}
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -240,6 +313,28 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
               className="w-auto max-w-md"
             />
           </div>
+
+          {/* Sección de traducciones existentes */}
+          {isEditing && existingTranslations.length > 0 && (
+            <div className="flex items-start gap-4">
+              <Label className="text-muted-foreground w-[120px] shrink-0 pt-2">Translations</Label>
+              <div className="flex flex-wrap gap-2 flex-1">
+                {existingTranslations.map((translation) => {
+                  const lang = getLanguageByCode(translation.language);
+                  return (
+                    <button
+                      key={translation.id}
+                      type="button"
+                      onClick={() => router.push(`/dashboard/blogs/${blogId}/posts/${translation.id}/edit`)}
+                      className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                      {lang?.name || translation.language}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <Label className="text-muted-foreground w-[120px] shrink-0">Published at</Label>
@@ -406,6 +501,20 @@ export function PostForm({ blogId, post, categories, tags, authors }: PostFormPr
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+      {successMessage && (
+        <p className="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
+      )}
+
+      {isEditing && post && (
+        <TranslatePostDialog
+          open={translateDialogOpen}
+          onOpenChange={setTranslateDialogOpen}
+          postId={post.id}
+          currentLanguage={language}
+          existingLanguages={existingTranslations.map((t) => t.language)}
+          blogId={blogId}
+        />
+      )}
     </form>
   );
 }

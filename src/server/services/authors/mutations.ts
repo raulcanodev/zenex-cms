@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
 
 const createAuthorSchema = z.object({
   blogId: z.string(),
@@ -36,12 +37,22 @@ export async function createAuthor(data: {
   }
 
   try {
-    // Verify blog ownership
+    // Verify blog access
     const blog = await prisma.blog.findUnique({
       where: { id: data.blogId },
     });
 
-    if (!blog || blog.userId !== session.user.id) {
+    if (!blog) {
+      return { error: "Blog not found" };
+    }
+
+    const hasAccess = await userHasAccessToBlog(
+      session.user.id,
+      session.user.email || "",
+      data.blogId
+    );
+
+    if (!hasAccess) {
       return { error: "Unauthorized" };
     }
 
@@ -112,7 +123,17 @@ export async function updateAuthor(
       },
     });
 
-    if (!author || author.blog.userId !== session.user.id) {
+    if (!author) {
+      return { error: "Author not found" };
+    }
+
+    const hasAccess = await userHasAccessToBlog(
+      session.user.id,
+      session.user.email || "",
+      author.blogId
+    );
+
+    if (!hasAccess) {
       return { error: "Unauthorized" };
     }
 
@@ -179,7 +200,17 @@ export async function deleteAuthor(id: string) {
       },
     });
 
-    if (!author || author.blog.userId !== session.user.id) {
+    if (!author) {
+      return { error: "Author not found" };
+    }
+
+    const hasAccess = await userHasAccessToBlog(
+      session.user.id,
+      session.user.email || "",
+      author.blogId
+    );
+
+    if (!hasAccess) {
       return { error: "Unauthorized" };
     }
 

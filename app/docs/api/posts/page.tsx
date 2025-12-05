@@ -31,7 +31,14 @@ export default function PostsApiDocsPage() {
               <li><code className="rounded bg-muted px-1.5 py-0.5">page</code> - Page number (default: 1)</li>
               <li><code className="rounded bg-muted px-1.5 py-0.5">limit</code> - Posts per page (default: 10)</li>
               <li><code className="rounded bg-muted px-1.5 py-0.5">category</code> - Filter by category ID (optional)</li>
-              <li><code className="rounded bg-muted px-1.5 py-0.5">language</code> - Filter by language code (ISO 639-1, optional)</li>
+              <li>
+                <code className="rounded bg-muted px-1.5 py-0.5">language</code> - Filter by language code (ISO 639-1, optional)
+                <ul className="ml-4 mt-1 space-y-1 text-xs">
+                  <li>Examples: <code className="rounded bg-muted px-1 py-0.5">en</code> (English), <code className="rounded bg-muted px-1 py-0.5">es</code> (Spanish), <code className="rounded bg-muted px-1 py-0.5">fr</code> (French)</li>
+                  <li>If omitted, returns posts in all languages</li>
+                  <li>Each post in the response includes an <code className="rounded bg-muted px-1 py-0.5">availableLanguages</code> array showing all available translations</li>
+                </ul>
+              </li>
             </ul>
           </DocsSection>
 
@@ -85,10 +92,13 @@ export default function PostsApiDocsPage() {
             />
           </DocsSection>
 
-          <DocsSection id="example" title="Example">
-            <DocsCodeBlock
-              language="typescript"
-              code={`const blogId = "your-blog-id";
+          <DocsSection id="example" title="Examples">
+            <div className="space-y-4">
+              <div>
+                <h4 className="mb-2 text-sm font-semibold">Basic Example</h4>
+                <DocsCodeBlock
+                  language="typescript"
+                  code={`const blogId = "your-blog-id";
 const page = 1;
 const limit = 10;
 
@@ -102,8 +112,57 @@ console.log(\`Total pages: \${pagination.totalPages}\`);
 
 // Render content using post.html
 // See "GET Single Post" documentation for styling instructions.`}
-              filename="example.ts"
-            />
+                  filename="example.ts"
+                />
+              </div>
+              
+              <div>
+                <h4 className="mb-2 text-sm font-semibold">Filter by Language</h4>
+                <DocsCodeBlock
+                  language="typescript"
+                  code={`const blogId = "your-blog-id";
+const language = "es"; // Spanish
+
+// Fetch only Spanish posts
+const res = await fetch(
+  \`https://yourdomain.com/api/blogs/\${blogId}/posts?language=\${language}\`
+);
+const { data: posts } = await res.json();
+
+// All posts in the response will have language: "es"
+posts.forEach(post => {
+  console.log(\`\${post.title} (Language: \${post.language})\`);
+  console.log(\`Available translations: \${post.availableLanguages.join(", ")}\`);
+});`}
+                  filename="filter-by-language.ts"
+                />
+              </div>
+
+              <div>
+                <h4 className="mb-2 text-sm font-semibold">Get All Languages</h4>
+                <DocsCodeBlock
+                  language="typescript"
+                  code={`const blogId = "your-blog-id";
+
+// Fetch posts in all languages (no language parameter)
+const res = await fetch(
+  \`https://yourdomain.com/api/blogs/\${blogId}/posts\`
+);
+const { data: posts } = await res.json();
+
+// Group posts by language
+const postsByLanguage = posts.reduce((acc, post) => {
+  const lang = post.language || "unknown";
+  if (!acc[lang]) acc[lang] = [];
+  acc[lang].push(post);
+  return acc;
+}, {} as Record<string, typeof posts>);
+
+console.log("Posts by language:", postsByLanguage);`}
+                  filename="all-languages.ts"
+                />
+              </div>
+            </div>
           </DocsSection>
         </div>
       </main>

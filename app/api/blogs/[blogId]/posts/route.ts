@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
-import { getPostsByBlogId } from "@/src/server/services/posts/queries";
+import { getPostsByBlogId, getAvailableLanguagesBySlug } from "@/src/server/services/posts/queries";
 import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 export async function GET(
@@ -34,37 +34,43 @@ export async function GET(
     });
 
     // Format response for API
-    const formattedPosts = posts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      slug: post.slug,
-      content: post.content, // Include content for testing/example purposes
-      html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
-      excerpt: post.excerpt,
-      coverImage: post.coverImage,
-      language: post.language,
-      publishedAt: post.publishedAt,
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-      categories: post.categories.map((pc) => ({
-        id: pc.category.id,
-        name: pc.category.name,
-        slug: pc.category.slug,
-      })),
-      tags: post.tags.map((pt) => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug,
-      })),
-      // SEO fields
-      metaTitle: post.metaTitle,
-      metaDescription: post.metaDescription,
-      ogImage: post.ogImage,
-      ogTitle: post.ogTitle,
-      ogDescription: post.ogDescription,
-      canonicalUrl: post.canonicalUrl,
-      keywords: post.keywords,
-    }));
+    const formattedPosts = await Promise.all(
+      posts.map(async (post) => {
+        const availableLanguages = await getAvailableLanguagesBySlug(blog.id, post.slug);
+        return {
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          content: post.content, // Include content for testing/example purposes
+          html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
+          excerpt: post.excerpt,
+          coverImage: post.coverImage,
+          language: post.language,
+          publishedAt: post.publishedAt,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          categories: post.categories.map((pc) => ({
+            id: pc.category.id,
+            name: pc.category.name,
+            slug: pc.category.slug,
+          })),
+          tags: post.tags.map((pt) => ({
+            id: pt.tag.id,
+            name: pt.tag.name,
+            slug: pt.tag.slug,
+          })),
+          // SEO fields
+          metaTitle: post.metaTitle,
+          metaDescription: post.metaDescription,
+          ogImage: post.ogImage,
+          ogTitle: post.ogTitle,
+          ogDescription: post.ogDescription,
+          canonicalUrl: post.canonicalUrl,
+          keywords: post.keywords,
+          availableLanguages,
+        };
+      })
+    );
 
     return NextResponse.json({
       data: formattedPosts,
