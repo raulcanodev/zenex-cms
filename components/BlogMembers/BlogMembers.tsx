@@ -24,10 +24,15 @@ interface BlogMembersProps {
   blogId: string;
   members: BlogMember[];
   ownerEmail: string;
+  ownerUser?: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
   isOwner: boolean;
 }
 
-export function BlogMembers({ blogId, members: initialMembers, ownerEmail, isOwner }: BlogMembersProps) {
+export function BlogMembers({ blogId, members: initialMembers, ownerEmail, ownerUser, isOwner }: BlogMembersProps) {
   const router = useRouter();
   const [members, setMembers] = useState(initialMembers);
   const [email, setEmail] = useState("");
@@ -93,7 +98,7 @@ export function BlogMembers({ blogId, members: initialMembers, ownerEmail, isOwn
       id: "owner",
       userEmail: ownerEmail,
       createdAt: new Date(),
-      user: null,
+      user: ownerUser || null,
       isOwner: true,
     },
     ...members.map((m) => ({ ...m, isOwner: false })),

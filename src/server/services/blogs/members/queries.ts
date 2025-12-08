@@ -19,6 +19,11 @@ export async function getBlogMembers(blogId: string): Promise<{
   error?: string;
   members?: BlogMemberWithUser[];
   ownerEmail?: string;
+  ownerUser?: {
+    id: string;
+    name: string | null;
+    email: string;
+  } | null;
 }> {
   const session = await getSession();
   if (!session?.user?.id || !session?.user?.email) {
@@ -89,6 +94,7 @@ export async function getBlogMembers(blogId: string): Promise<{
     return {
       members: membersWithUser,
       ownerEmail: blog.user.email,
+      ownerUser: blog.user,
     };
   } catch (error) {
     console.error("Error fetching blog members:", error);

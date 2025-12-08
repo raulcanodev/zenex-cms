@@ -37,6 +37,7 @@ export default async function BlogSettingsPage({
   const membersResult = await getBlogMembers(id);
   const members = membersResult.members || [];
   const ownerEmail = membersResult.ownerEmail || "";
+  const ownerUser = membersResult.ownerUser || null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,6 +56,7 @@ export default async function BlogSettingsPage({
               blogId={id}
               members={members}
               ownerEmail={ownerEmail}
+              ownerUser={ownerUser}
               isOwner={isOwner}
             />
           </div>

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,7 @@ interface PostFormProps {
     excerpt?: string | null;
     coverImage?: string | null;
     status: string;
+    featured?: boolean | null;
     publishedAt?: Date | null;
     authorId?: string | null;
     metaTitle?: string | null;
@@ -68,6 +70,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
   const [status, setStatus] = useState<"draft" | "published">(
     (post?.status as "draft" | "published") || "draft"
   );
+  const [featured, setFeatured] = useState(post?.featured ?? false);
   const [publishedAt, setPublishedAt] = useState(
     post?.publishedAt ? new Date(post.publishedAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]
   );
@@ -116,6 +119,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
       excerpt: excerpt || undefined,
       coverImage: coverImage || undefined,
       status,
+      featured,
       publishedAt: publishedAt ? new Date(publishedAt) : undefined,
       authorId: authorId || undefined,
       language: language || "en",

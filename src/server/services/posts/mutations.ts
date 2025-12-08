@@ -18,6 +18,7 @@ const createPostSchema = z.object({
   excerpt: z.string().optional(),
   coverImage: z.string().optional(),
   status: z.enum(["draft", "published"]).default("draft"),
+  featured: z.boolean().optional(),
   publishedAt: z.date().optional(),
   authorId: z.string().optional(),
   language: z.string().refine((val) => isValidLanguageCode(val), {
@@ -46,6 +47,7 @@ export async function createPost(data: {
   excerpt?: string;
   coverImage?: string;
   status?: "draft" | "published";
+  featured?: boolean;
   publishedAt?: Date;
   authorId?: string;
   language: string;
@@ -113,6 +115,7 @@ export async function createPost(data: {
         excerpt: validated.excerpt,
         coverImage: validated.coverImage,
         status: validated.status,
+        featured: validated.featured ?? false,
         publishedAt: validated.publishedAt,
         authorId: validated.authorId,
         language: validated.language,
@@ -160,6 +163,7 @@ export async function updatePost(
     excerpt?: string;
     coverImage?: string;
     status?: "draft" | "published";
+    featured?: boolean;
     publishedAt?: Date;
     authorId?: string;
     language?: string;
@@ -253,6 +257,7 @@ export async function updatePost(
         excerpt: validated.excerpt,
         coverImage: validated.coverImage,
         status: validated.status,
+        featured: validated.featured !== undefined ? validated.featured : undefined,
         publishedAt:
           validated.status === "published" && !post.publishedAt
             ? validated.publishedAt || new Date()
@@ -474,6 +479,7 @@ export async function translatePost(postId: string, targetLanguage: string) {
         excerpt: translatedExcerpt,
         coverImage: originalPost.coverImage, // Keep same image
         status: originalPost.status,
+        featured: originalPost.featured, // Keep same featured status
         publishedAt: originalPost.publishedAt,
         authorId: originalPost.authorId,
         language: targetLanguage,
@@ -644,6 +650,7 @@ export async function syncPostTranslations(postId: string) {
               ogImage: currentPost.ogImage,
               canonicalUrl: currentPost.canonicalUrl,
               status: currentPost.status,
+              featured: currentPost.featured, // Sync featured status
               authorId: currentPost.authorId,
               publishedAt: currentPost.publishedAt,
               // Sync categories

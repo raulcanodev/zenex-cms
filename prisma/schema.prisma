@@ -51,6 +51,7 @@ model Post {
   excerpt            String?
   coverImage         String?
   status             String    @default("draft") // draft | published
+  featured           Boolean   @default(false)
   publishedAt        DateTime?
   authorId           String?
   language           String    @default("en") // ISO 639-1 language code
