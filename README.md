@@ -5,7 +5,8 @@
 <div align="center">
   <h1>🚀 Zenex CMS</h1>
   <p><strong>A modern, multilingual content management system built with Next.js</strong></p>
-  
+  <p><em>Highly inspired by <a href="https://www.zenblog.com/">Zenblog</a>.</em></p>
+
   [![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js)](https://nextjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
   [![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma)](https://www.prisma.io/)
