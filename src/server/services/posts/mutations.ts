@@ -116,7 +116,9 @@ export async function createPost(data: {
         coverImage: validated.coverImage,
         status: validated.status,
         featured: validated.featured ?? false,
-        publishedAt: validated.publishedAt,
+        publishedAt: validated.status === "published" && !validated.publishedAt 
+          ? new Date() 
+          : validated.publishedAt,
         authorId: validated.authorId,
         language: validated.language,
         translationGroupId,
@@ -259,8 +261,8 @@ export async function updatePost(
         status: validated.status,
         featured: validated.featured !== undefined ? validated.featured : undefined,
         publishedAt:
-          validated.status === "published" && !post.publishedAt
-            ? validated.publishedAt || new Date()
+          validated.status === "published" && !post.publishedAt && !validated.publishedAt
+            ? new Date()
             : validated.publishedAt,
         authorId: validated.authorId,
         language: validated.language,
