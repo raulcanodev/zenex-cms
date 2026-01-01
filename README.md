@@ -1,3 +1,7 @@
+<img width="1967" height="1227" alt="image" src="https://github.com/user-attachments/assets/98987271-8a13-4592-8d72-4c392ebb8d91" />
+<img width="1972" height="1224" alt="image" src="https://github.com/user-attachments/assets/467c6efb-76b6-4e5e-9cac-f8c74b7bae42" />
+
+
 <div align="center">
   <h1>🚀 Zenex CMS</h1>
   <p><strong>A modern, multilingual content management system built with Next.js</strong></p>
