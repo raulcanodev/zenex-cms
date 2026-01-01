@@ -24,6 +24,10 @@ export async function GET(
     const categoryId = searchParams.get("category") || undefined;
     const languageParam = searchParams.get("language");
     const language = languageParam && languageParam.trim() ? languageParam : undefined;
+    const orderByParam = searchParams.get("orderBy") as "publishedAt" | "createdAt" | "title" | null;
+    const orderBy = orderByParam || "publishedAt";
+    const orderParam = searchParams.get("order") as "asc" | "desc" | null;
+    const order = orderParam || "desc";
 
     const { posts, pagination } = await getPostsByBlogId(blog.id, {
       page,
@@ -31,6 +35,8 @@ export async function GET(
       status,
       categoryId,
       language,
+      orderBy,
+      order,
     });
 
     // Format response for API

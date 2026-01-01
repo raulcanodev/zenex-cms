@@ -23,14 +23,19 @@ You can use the hosted version at cms.zenex.dev or your own self-hosted deployme
 All endpoints require the full CMS URL. Examples use \${process.env.NEXT_PUBLIC_CMS_URL}.
 
 ### GET {CMS_URL}/api/blogs/{blogId}/posts
-List all published posts with pagination.
+List posts with pagination.
 
 Query Parameters:
 - page: number (default: 1)
 - limit: number (default: 10)
+- status: string ('published' | 'draft', optional - defaults to all posts)
 - category: string (category ID, optional)
 - tag: string (tag ID, optional)
 - language: string (ISO 639-1 code like 'en', 'es', 'fr', optional)
+- orderBy: string ('publishedAt' | 'createdAt' | 'title', default: 'publishedAt')
+- order: string ('asc' | 'desc', default: 'desc')
+
+⚠️ IMPORTANT: By default, this endpoint returns ALL posts (including drafts). For public blogs, always add status=published to the URL.
 
 Response:
 {
@@ -224,7 +229,7 @@ export default async function BlogPage() {
   const CMS_URL = process.env.NEXT_PUBLIC_CMS_URL;
   const BLOG_ID = process.env.NEXT_PUBLIC_BLOG_ID;
   
-  const res = await fetch(\`\${CMS_URL}/api/blogs/\${BLOG_ID}/posts?page=1&limit=10\`);
+  const res = await fetch(\`\${CMS_URL}/api/blogs/\${BLOG_ID}/posts?status=published&page=1&limit=10\`);
   const { data: posts } = await res.json();
 
   return (

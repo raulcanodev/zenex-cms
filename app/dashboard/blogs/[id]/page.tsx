@@ -14,11 +14,11 @@ export default async function BlogPostsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
   const session = await getSession();
   const { id } = await params;
-  const { status } = await searchParams;
+  const { status, page: pageParam } = await searchParams;
   const blog = await getBlogById(id);
 
   if (!blog) {
@@ -35,9 +35,11 @@ export default async function BlogPostsPage({
     redirect("/dashboard");
   }
 
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+
   const { posts, pagination } = await getPostsByBlogId(id, {
     status: status || undefined,
-    page: 1,
+    page: currentPage,
     limit: 20,
   });
 
@@ -77,9 +79,54 @@ export default async function BlogPostsPage({
             <p className="text-muted-foreground">No posts yet. Create your first post to get started.</p>
           </div>
         )}
-        {pagination.totalPages > 1 && (
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            Showing {posts.length} posts
+        {pagination.totalPages > 0 && (
+          <div className="mt-8 flex items-center justify-between border-t pt-6">
+            <div className="text-sm text-muted-foreground">
+              {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
+            </div>
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <Link
+                  href={`/dashboard/blogs/${id}?page=${pagination.page - 1}${status ? `&status=${status}` : ""}`}
+                  className={pagination.page === 1 ? "pointer-events-none" : ""}
+                >
+                  <Button variant="ghost" size="sm" disabled={pagination.page === 1} className="h-8 w-8 p-0">
+                    ←
+                  </Button>
+                </Link>
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (pagination.totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.page <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.page >= pagination.totalPages - 2) {
+                    pageNum = pagination.totalPages - 4 + i;
+                  } else {
+                    pageNum = pagination.page - 2 + i;
+                  }
+                  return (
+                    <Link key={pageNum} href={`/dashboard/blogs/${id}?page=${pageNum}${status ? `&status=${status}` : ""}`}>
+                      <Button
+                        variant={pagination.page === pageNum ? "default" : "ghost"}
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        {pageNum}
+                      </Button>
+                    </Link>
+                  );
+                })}
+                <Link
+                  href={`/dashboard/blogs/${id}?page=${pagination.page + 1}${status ? `&status=${status}` : ""}`}
+                  className={pagination.page === pagination.totalPages ? "pointer-events-none" : ""}
+                >
+                  <Button variant="ghost" size="sm" disabled={pagination.page === pagination.totalPages} className="h-8 w-8 p-0">
+                    →
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -9,11 +9,15 @@ export async function getPostsByBlogId(
     language?: string;
     page?: number;
     limit?: number;
+    orderBy?: "publishedAt" | "createdAt" | "title";
+    order?: "asc" | "desc";
   }
 ) {
   const page = options?.page || 1;
   const limit = options?.limit || 10;
   const skip = (page - 1) * limit;
+  const orderByField = options?.orderBy || "publishedAt";
+  const orderDirection = options?.order || "desc";
 
   const where: {
     blogId: string;
@@ -49,9 +53,14 @@ export async function getPostsByBlogId(
       where,
       skip,
       take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        {
+          [orderByField]: orderDirection,
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
       include: {
         categories: {
           include: {
