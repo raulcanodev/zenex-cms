@@ -26,6 +26,7 @@ import { createPost, updatePost, syncPostTranslations } from "@/src/server/servi
 import { ChevronDown, ChevronUp, Languages, RefreshCw } from "lucide-react";
 import { LanguageSelector } from "@/components/LanguageSelector/LanguageSelector";
 import { TranslatePostDialog } from "@/components/TranslatePostDialog/TranslatePostDialog";
+import { DeletePostDialog } from "@/components/DeletePostDialog/DeletePostDialog";
 import { getLanguageByCode } from "@/lib/languages";
 
 interface PostFormProps {
@@ -215,13 +216,18 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" onClick={() => router.push(`/dashboard/blogs/${blogId}`)}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading || isSyncing}>
-            {isEditing ? "Update" : "Save"}
-          </Button>
+        <div className="flex items-center justify-between gap-2">
+          {isEditing && post && (
+            <DeletePostDialog postId={post.id} postTitle={post.title} blogId={blogId} />
+          )}
+          <div className="flex items-center gap-2 ml-auto">
+            <Button type="button" variant="outline" onClick={() => router.push(`/dashboard/blogs/${blogId}`)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading || isSyncing}>
+              {isEditing ? "Update" : "Save"}
+            </Button>
+          </div>
         </div>
       </div>
 

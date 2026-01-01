@@ -8,6 +8,7 @@ import Quote from "@editorjs/quote";
 import Code from "@editorjs/code";
 import LinkTool from "@editorjs/link";
 import Image from "@editorjs/image";
+import Table from "@editorjs/table";
 
 interface EditorProps {
   data?: OutputData;
@@ -58,6 +59,14 @@ export function Editor({ data, onChange, placeholder }: EditorProps) {
             class: Code as any,
             config: {
               placeholder: "Enter code",
+            },
+          },
+          table: {
+            class: Table as any,
+            inlineToolbar: true,
+            config: {
+              rows: 2,
+              cols: 3,
             },
           },
           linkTool: {

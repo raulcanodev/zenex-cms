@@ -17,6 +17,7 @@
     "@editorjs/link": "^2.6.2",
     "@editorjs/list": "^2.0.9",
     "@editorjs/quote": "^2.7.6",
+    "@editorjs/table": "^2.4.5",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "6.19.0",
     "@prisma/client": "6.19.0",

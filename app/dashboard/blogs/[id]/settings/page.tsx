@@ -6,6 +6,8 @@ import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { BlogNavigation } from "@/components/BlogNavigation/BlogNavigation";
 import { BlogIdDisplay } from "@/components/BlogIdDisplay/BlogIdDisplay";
 import { BlogMembers } from "@/components/BlogMembers/BlogMembers";
+import { ImportPostsDialog } from "@/components/ImportPostsDialog/ImportPostsDialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getBlogMembers } from "@/src/server/services/blogs/members/queries";
 
 export default async function BlogSettingsPage({
@@ -59,6 +61,19 @@ export default async function BlogSettingsPage({
               ownerUser={ownerUser}
               isOwner={isOwner}
             />
+          </div>
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Import Posts</CardTitle>
+                <CardDescription>
+                  Bulk import posts from markdown files with frontmatter. Supports multiple file upload and drag & drop.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ImportPostsDialog blogId={id} />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
