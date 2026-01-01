@@ -5,7 +5,7 @@
 <div align="center">
   <h1>🚀 Zenex CMS</h1>
   <p><strong>A modern, multilingual content management system built with Next.js</strong></p>
-  <p><em>Highly inspired by <a href="https://www.zenblog.com/">Zenblog</a>.</em></p>
+  <p><em>Highly inspired by <a href="https://www.zenblog.com/">Zenblog</a>. I have always admired the Zenblog project and the design philosophy of Jordi Enric. This is not a fork, as you can observe by comparing both codebases. The resemblance lies mainly in some UI elements and the shared minimalist, headless concept.</em></p>
 
   [![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js)](https://nextjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
