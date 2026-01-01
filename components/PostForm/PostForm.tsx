@@ -98,6 +98,33 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [autoSlug, setAutoSlug] = useState(!post?.slug);
   const [translateDialogOpen, setTranslateDialogOpen] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+
+  async function handleCoverImageUpload(file: File) {
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('blogId', blogId);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      setCoverImage(data.file.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploadingCover(false);
+    }
+  }
 
   // Compute derived values
   const computedSlug = autoSlug && title ? slugify(title) : slug;
@@ -232,54 +259,105 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
       </div>
 
       <div className="space-y-6">
-        {/* Cover image - pequeño icono arriba */}
+        {/* Cover image - thumbnail grande */}
         {coverImage ? (
-          <div className="group relative inline-block">
-            <NextImage src={coverImage} alt="Cover" width={48} height={48} className="h-12 w-12 rounded object-cover" />
-            <button
-              type="button"
-              onClick={() => setCoverImage("")}
-              className="absolute -right-2 -top-2 hidden h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground group-hover:flex"
-            >
-              ×
-            </button>
+          <div className="group relative w-full">
+            <div className="relative w-full overflow-hidden rounded-lg border bg-muted">
+              <NextImage 
+                src={coverImage} 
+                alt="Cover" 
+                width={1200} 
+                height={630} 
+                className="w-full h-auto object-cover max-h-96" 
+              />
+              <button
+                type="button"
+                onClick={() => setCoverImage("")}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                ×
+              </button>
+            </div>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => {
-              const url = prompt("Enter image URL:");
-              if (url) setCoverImage(url);
-            }}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              id="cover-upload"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleCoverImageUpload(file);
+              }}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => document.getElementById('cover-upload')?.click()}
+              disabled={uploadingCover}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
             >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <circle cx="9" cy="9" r="2" />
-              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-            </svg>
-            Cover image
-          </button>
+              {uploadingCover ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                  Upload cover image
+                </>
+              )}
+            </button>
+            <span className="text-muted-foreground">or</span>
+            <button
+              type="button"
+              onClick={() => {
+                const url = prompt("Enter image URL:");
+                if (url) setCoverImage(url);
+              }}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              paste URL
+            </button>
+          </div>
         )}
 
-        {/* Título grande sin label */}
-        <input
-          type="text"
+        {/* Título más pequeño y con wrap */}
+        <textarea
           placeholder="Post title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full border-0 bg-transparent px-0 text-5xl font-bold outline-none placeholder:text-muted-foreground/20"
+          rows={1}
+          onInput={(e) => {
+            e.currentTarget.style.height = 'auto';
+            e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+          }}
+          ref={(el) => {
+            if (el) {
+              el.style.height = 'auto';
+              el.style.height = el.scrollHeight + 'px';
+            }
+          }}
+          className="w-full resize-none border-0 bg-transparent px-0 text-3xl font-bold outline-none placeholder:text-muted-foreground/20 overflow-hidden"
         />
 
         {/* Campos principales en grid compacto */}
@@ -293,7 +371,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
                 setAutoSlug(false);
               }}
               placeholder="a-great-title"
-              className="h-9 w-auto max-w-md border-0 bg-transparent px-2 shadow-none focus-visible:bg-muted/50 focus-visible:ring-0 dark:bg-transparent dark:focus-visible:bg-muted/20"
+              className="h-9 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:bg-muted/50 focus-visible:ring-0 dark:bg-transparent dark:focus-visible:bg-muted/20"
             />
           </div>
 
@@ -506,7 +584,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
 
         {/* Editor de contenido */}
         <div className="pt-6">
-          <Editor data={content} onChange={setContent} />
+          <Editor data={content} onChange={setContent} blogId={blogId} />
         </div>
       </div>
 

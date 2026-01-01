@@ -14,9 +14,10 @@ interface EditorProps {
   data?: OutputData;
   onChange?: (data: OutputData) => void;
   placeholder?: string;
+  blogId: string; // Required for image uploads
 }
 
-export function Editor({ data, onChange, placeholder }: EditorProps) {
+export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
   const editorRef = useRef<EditorJS | null>(null);
   const holderRef = useRef<HTMLDivElement>(null);
 
@@ -78,18 +79,32 @@ export function Editor({ data, onChange, placeholder }: EditorProps) {
           image: {
             class: Image as any,
             config: {
-              endpoints: {
-                byFile: "/api/upload", // You'll need to create this endpoint for image uploads
-              },
               uploader: {
                 async uploadByFile(file: File) {
-                  // Placeholder - implement actual upload logic
-                  return {
-                    success: 1,
-                    file: {
-                      url: URL.createObjectURL(file),
-                    },
-                  };
+                  try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('blogId', blogId);
+
+                    const response = await fetch('/api/upload', {
+                      method: 'POST',
+                      body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                      throw new Error(data.error || 'Upload failed');
+                    }
+
+                    return data;
+                  } catch (error) {
+                    console.error('Image upload error:', error);
+                    return {
+                      success: 0,
+                      error: error instanceof Error ? error.message : 'Upload failed',
+                    };
+                  }
                 },
               },
             },

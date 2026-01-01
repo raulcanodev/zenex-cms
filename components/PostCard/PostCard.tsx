@@ -1,6 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { getLanguageName } from "@/lib/languages";
+import { updatePost } from "@/src/server/services/posts/mutations";
+import { useRouter } from "next/navigation";
 
 interface PostCardProps {
   id: string;
@@ -23,6 +30,10 @@ export function PostCard({
   language,
   availableLanguages,
 }: PostCardProps) {
+  const router = useRouter();
+  const [currentStatus, setCurrentStatus] = useState(status);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const formattedDate = publishedAt
     ? new Date(publishedAt).toLocaleDateString("en-US", {
         year: "numeric",
@@ -88,11 +99,41 @@ export function PostCard({
               )}
             </div>
           </div>
-          {status === "published" && (
-            <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">
-              Published
-            </span>
-          )}
+          <div 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="flex items-center gap-2"
+          >
+            <Label 
+              htmlFor={`switch-${id}`}
+              className={`text-xs font-medium cursor-pointer ${
+                currentStatus === "published" ? "text-green-700" : "text-muted-foreground"
+              }`}
+            >
+              {currentStatus === "published" ? "Published" : "Draft"}
+            </Label>
+            <Switch
+              id={`switch-${id}`}
+              checked={currentStatus === "published"}
+              onCheckedChange={async (checked) => {
+                setIsUpdating(true);
+                const newStatus = checked ? "published" : "draft";
+                
+                const result = await updatePost(id, {
+                  status: newStatus as "draft" | "published",
+                });
+
+                if (!result.error) {
+                  setCurrentStatus(newStatus);
+                  router.refresh();
+                }
+                setIsUpdating(false);
+              }}
+              disabled={isUpdating}
+            />
+          </div>
         </CardContent>
       </Card>
     </Link>
