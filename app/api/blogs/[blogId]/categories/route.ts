@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
 import { getCategoriesByBlogIdCached } from "@/src/server/services/categories/queries";
-
+// Cache the GET response for 1 hour (categories change infrequently)
+export const revalidate = 3600;
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ blogId: string }> }

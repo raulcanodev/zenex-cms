@@ -48,44 +48,63 @@ export async function getPostsByBlogId(
     };
   }
 
-  const [posts, total] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: [
-        {
-          [orderByField]: orderDirection,
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
-      include: {
-        categories: {
-          include: {
-            category: true,
-          },
-        },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-      },
-    }),
-    prisma.post.count({ where }),
-  ]);
+  // Cache published posts for API consumption (60 seconds)
+  // Don't cache drafts or admin queries
+  const shouldCache = options?.status === "published";
 
-  return {
-    posts,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
+  const fetchPosts = async () => {
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [
+          {
+            [orderByField]: orderDirection,
+          },
+          {
+            createdAt: "desc",
+          },
+        ],
+        include: {
+          categories: {
+            include: {
+              category: true,
+            },
+          },
+          tags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    return {
+      posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   };
+
+  if (shouldCache) {
+    return unstable_cache(
+      fetchPosts,
+      [`posts-${blogId}-${page}-${limit}-${options?.status}-${options?.categoryId}-${options?.language}-${orderByField}-${orderDirection}`],
+      {
+        revalidate: 60,
+        tags: [`blog-${blogId}-posts`],
+      }
+    )();
+  }
+
+  return fetchPosts();
 }
 
 export async function getPostById(id: string) {

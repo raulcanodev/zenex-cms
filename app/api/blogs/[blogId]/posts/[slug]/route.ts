@@ -3,6 +3,9 @@ import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
 import { getPostBySlug, getPostBySlugAndLanguage, getAvailableLanguagesBySlug } from "@/src/server/services/posts/queries";
 import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
+// Cache the GET response for 60 seconds, revalidate in background
+export const revalidate = 60;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ blogId: string; slug: string }> }
