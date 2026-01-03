@@ -15,7 +15,7 @@ interface EditorProps {
   data?: OutputData;
   onChange?: (data: OutputData) => void;
   placeholder?: string;
-  blogId: string; // Required for image uploads
+  blogId: string;
 }
 
 export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
@@ -34,6 +34,7 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
         },
         tools: {
           header: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Header as any,
             config: {
               placeholder: "Enter a header",
@@ -42,6 +43,7 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             },
           },
           list: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: List as any,
             inlineToolbar: true,
             config: {
@@ -49,6 +51,7 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             },
           },
           quote: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Quote as any,
             inlineToolbar: true,
             shortcut: "CMD+SHIFT+O",
@@ -58,12 +61,14 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             },
           },
           code: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Code as any,
             config: {
               placeholder: "Enter code",
             },
           },
           table: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Table as any,
             inlineToolbar: true,
             config: {
@@ -72,12 +77,14 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             },
           },
           linkTool: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: LinkTool as any,
             config: {
-              endpoint: "/api/link", // You'll need to create this endpoint for link previews
+              endpoint: "/api/link",
             },
           },
           image: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Image as any,
             config: {
               uploader: {
@@ -111,6 +118,7 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             },
           },
           raw: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: RawTool as any,
             config: {
               placeholder: "Paste HTML embed code (Twitter, YouTube, etc.)",
