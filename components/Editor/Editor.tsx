@@ -9,6 +9,7 @@ import Code from "@editorjs/code";
 import LinkTool from "@editorjs/link";
 import Image from "@editorjs/image";
 import Table from "@editorjs/table";
+import RawTool from "@editorjs/raw";
 
 interface EditorProps {
   data?: OutputData;
@@ -107,6 +108,12 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
                   }
                 },
               },
+            },
+          },
+          raw: {
+            class: RawTool as any,
+            config: {
+              placeholder: "Paste HTML embed code (Twitter, YouTube, etc.)",
             },
           },
         },

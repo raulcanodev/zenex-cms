@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import type { OutputData } from "@editorjs/editorjs";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,13 @@ interface Block {
 }
 
 export function EditorRenderer({ data, className }: EditorRendererProps) {
+  useEffect(() => {
+    // Load Twitter widgets after component mounts for embeds
+    if (typeof window !== 'undefined' && (window as any).twttr?.widgets) {
+      (window as any).twttr.widgets.load();
+    }
+  }, [data]);
+
   if (!data || !data.blocks || data.blocks.length === 0) {
     return <p className="text-muted-foreground">No content available.</p>;
   }
@@ -131,6 +138,46 @@ function renderBlock(block: Block) {
             <p className="text-xs text-muted-foreground">{linkData.link}</p>
           </a>
         </div>
+      );
+
+    case "embed":
+      return (
+        <div className="my-6">
+          <div 
+            className="embed-responsive"
+            dangerouslySetInnerHTML={{ __html: block.data.embed || "" }}
+          />
+          {block.data.caption && (
+            <p className="text-sm text-muted-foreground mt-2 text-center">
+              {block.data.caption}
+            </p>
+          )}
+        </div>
+      );
+
+    case "embed":
+      return (
+        <div className="my-6 flex justify-center">
+          <div className="max-w-full w-full">
+            <div 
+              className="embed-container"
+              dangerouslySetInnerHTML={{ __html: block.data.embed || '' }}
+            />
+            {block.data.caption && (
+              <p className="text-sm text-muted-foreground mt-2 text-center">
+                {block.data.caption}
+              </p>
+            )}
+          </div>
+        </div>
+      );
+
+    case "raw":
+      return (
+        <div 
+          className="my-6"
+          dangerouslySetInnerHTML={{ __html: block.data.html || "" }}
+        />
       );
 
     default:
