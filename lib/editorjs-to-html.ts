@@ -53,6 +53,15 @@ export function convertBlocksToHtml(blocks: OutputBlockData[]): string {
             </div>
           `;
         
+        case "raw":
+          return block.data.html || "";
+        
+        case "embed":
+          return `<div class="zenex-cms__embed">${block.data.embed || ""}</div>`;
+        
+        case "delimiter":
+          return `<div class="zenex-cms__delimiter" style="text-align: center; margin: 2rem 0; font-size: 1.5rem; color: #6b7280;">* * *</div>`;
+        
         default:
           return "";
       }

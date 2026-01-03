@@ -10,6 +10,7 @@ import LinkTool from "@editorjs/link";
 import Image from "@editorjs/image";
 import Table from "@editorjs/table";
 import RawTool from "@editorjs/raw";
+import Delimiter from "@editorjs/delimiter";
 
 interface EditorProps {
   data?: OutputData;
@@ -123,6 +124,10 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             config: {
               placeholder: "Paste HTML embed code (Twitter, YouTube, etc.)",
             },
+          },
+          delimiter: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            class: Delimiter as any,
           },
         },
         onChange: async () => {

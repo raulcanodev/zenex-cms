@@ -180,6 +180,13 @@ function renderBlock(block: Block) {
         />
       );
 
+    case "delimiter":
+      return (
+        <div className="my-8 flex justify-center">
+          <div className="text-2xl text-muted-foreground">* * *</div>
+        </div>
+      );
+
     default:
       return (
         <div className="text-muted-foreground text-sm italic">
