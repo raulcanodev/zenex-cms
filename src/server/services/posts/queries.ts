@@ -290,4 +290,40 @@ export async function getAvailableLanguagesBySlug(
   return posts.map((p) => p.language).filter(Boolean);
 }
 
+export async function getAvailableLanguagesByTranslationGroupIds(
+  translationGroupIds: string[]
+): Promise<Record<string, string[]>> {
+  const uniqueIds = Array.from(
+    new Set(translationGroupIds.filter(Boolean))
+  );
+
+  if (uniqueIds.length === 0) {
+    return {};
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      translationGroupId: {
+        in: uniqueIds,
+      },
+    },
+    select: {
+      translationGroupId: true,
+      language: true,
+    },
+  });
+
+  return posts.reduce<Record<string, string[]>>((acc, post) => {
+    if (!post.translationGroupId || !post.language) {
+      return acc;
+    }
+
+    if (!acc[post.translationGroupId]) {
+      acc[post.translationGroupId] = [];
+    }
+
+    acc[post.translationGroupId].push(post.language);
+    return acc;
+  }, {});
+}
 
