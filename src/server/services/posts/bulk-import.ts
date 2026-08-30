@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
 import { v4 as uuidv4 } from "uuid";
 
@@ -125,6 +125,7 @@ export async function importPostsInBulk(data: {
       }
     }
 
+    updateTag(`blog-${data.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${data.blogId}`);
     return {
       success: true,

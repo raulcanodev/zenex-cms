@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,8 +30,7 @@ interface EditAuthorDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function EditAuthorDialog({ author, blogId, open: controlledOpen, onOpenChange }: EditAuthorDialogProps) {
-  const router = useRouter();
+export function EditAuthorDialog({ author, open: controlledOpen, onOpenChange }: EditAuthorDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = (value: boolean) => {
@@ -41,6 +40,15 @@ export function EditAuthorDialog({ author, blogId, open: controlledOpen, onOpenC
       setInternalOpen(value);
     }
   };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {open && <EditAuthorForm key={author.id} author={author} setOpen={setOpen} />}
+    </Dialog>
+  );
+}
+
+function EditAuthorForm({ author, setOpen }: { author: Author; setOpen: (open: boolean) => void }) {
+  const router = useRouter();
   const [name, setName] = useState(author.name);
   const [email, setEmail] = useState(author.email);
   const [slug, setSlug] = useState(author.slug);
@@ -48,17 +56,6 @@ export function EditAuthorDialog({ author, blogId, open: controlledOpen, onOpenC
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [manualSlug, setManualSlug] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setName(author.name);
-      setEmail(author.email);
-      setSlug(author.slug);
-      setBio(author.bio || "");
-      setError("");
-      setManualSlug(false);
-    }
-  }, [open, author]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -83,7 +80,6 @@ export function EditAuthorDialog({ author, blogId, open: controlledOpen, onOpenC
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit author</DialogTitle>
@@ -149,7 +145,6 @@ export function EditAuthorDialog({ author, blogId, open: controlledOpen, onOpenC
           </div>
         </form>
       </DialogContent>
-    </Dialog>
   );
 }
 

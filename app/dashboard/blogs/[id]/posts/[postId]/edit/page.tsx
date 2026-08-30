@@ -1,3 +1,4 @@
+import type { OutputData } from "@editorjs/editorjs";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/get-session";
 import { getBlogById } from "@/src/server/services/blogs/queries";
@@ -66,7 +67,7 @@ export default async function EditPostPage({
             id: post.id,
             title: post.title,
             slug: post.slug,
-            content: post.content as any,
+            content: post.content as unknown as OutputData,
             excerpt: post.excerpt,
             coverImage: post.coverImage,
             status: post.status,

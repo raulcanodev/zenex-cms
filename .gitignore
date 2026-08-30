@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Commit reproducible dependency resolutions, including security fixes.
+!package-lock.json

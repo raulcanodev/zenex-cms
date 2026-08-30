@@ -6,6 +6,8 @@ export async function getPostsByBlogId(
   options?: {
     status?: string;
     categoryId?: string;
+    tagId?: string;
+    includeContent?: boolean;
     language?: string;
     page?: number;
     limit?: number;
@@ -22,6 +24,7 @@ export async function getPostsByBlogId(
   const where: {
     blogId: string;
     status?: string;
+    tags?: { some: { tagId: string } };
     language?: string;
     categories?: {
       some: {
@@ -48,6 +51,8 @@ export async function getPostsByBlogId(
     };
   }
 
+  if (options?.tagId) where.tags = { some: { tagId: options.tagId } };
+
   // Cache published posts for API consumption (60 seconds)
   // Don't cache drafts or admin queries
   const shouldCache = options?.status === "published";
@@ -58,6 +63,7 @@ export async function getPostsByBlogId(
         where,
         skip,
         take: limit,
+        omit: { content: options?.includeContent === false },
         orderBy: [
           {
             [orderByField]: orderDirection,
@@ -96,7 +102,7 @@ export async function getPostsByBlogId(
   if (shouldCache) {
     return unstable_cache(
       fetchPosts,
-      [`posts-${blogId}-${page}-${limit}-${options?.status}-${options?.categoryId}-${options?.language}-${orderByField}-${orderDirection}`],
+      [`posts-${blogId}-${page}-${limit}-${options?.status}-${options?.categoryId}-${options?.tagId}-${options?.language}-${orderByField}-${orderDirection}-${options?.includeContent !== false}`],
       {
         revalidate: 60,
         tags: [`blog-${blogId}-posts`],
@@ -153,7 +159,8 @@ export async function getPostBySlug(blogId: string, slug: string) {
     },
     [`post-${blogId}-${slug}`],
     {
-      revalidate: 3600,
+      revalidate: 60,
+      tags: [`blog-${blogId}-posts`],
     }
   )();
 }
@@ -199,6 +206,7 @@ export async function getPostBySlugAndLanguage(
           blogId,
           slug,
           language,
+          status: "published",
         },
         include: {
           categories: {
@@ -216,7 +224,8 @@ export async function getPostBySlugAndLanguage(
     },
     [`post-${blogId}-${slug}-${language}`],
     {
-      revalidate: 3600,
+      revalidate: 60,
+      tags: [`blog-${blogId}-posts`],
     }
   )();
 }
@@ -327,3 +336,26 @@ export async function getAvailableLanguagesByTranslationGroupIds(
   }, {});
 }
 
+
+/** One query for the entire API page; never advertise draft translations. */
+export async function getPublishedLanguagesByGroup(blogId: string, groupIds: string[]) {
+  const ids = [...new Set(groupIds)].sort();
+  if (!ids.length) return {} as Record<string, string[]>;
+  return unstable_cache(async () => {
+    const translations = await prisma.post.findMany({
+      where: { blogId, status: "published", translationGroupId: { in: ids } },
+      select: { translationGroupId: true, language: true },
+      orderBy: { language: "asc" },
+    });
+    const languages: Record<string, string[]> = {};
+    for (const translation of translations) {
+      if (!translation.translationGroupId) continue;
+      const group = languages[translation.translationGroupId] ??= [];
+      if (!group.includes(translation.language)) group.push(translation.language);
+    }
+    return languages;
+  }, ["published-languages", blogId, ...ids], {
+    revalidate: 60,
+    tags: [`blog-${blogId}-posts`],
+  })();
+}

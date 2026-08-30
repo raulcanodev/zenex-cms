@@ -1,9 +1,10 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import type { OutputData } from "@editorjs/editorjs";
 import { isValidLanguageCode } from "@/lib/languages";
 import { v4 as uuidv4 } from "uuid";
@@ -146,6 +147,7 @@ export async function createPost(data: {
       },
     });
 
+    updateTag(`blog-${data.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${data.blogId}`);
     return { success: true, post };
   } catch (error) {
@@ -292,6 +294,7 @@ export async function updatePost(
       },
     });
 
+    updateTag(`blog-${post.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${post.blogId}`);
     revalidatePath(`/dashboard/blogs/${post.blogId}/posts/${id}`);
     return { success: true, post: updatedPost };
@@ -335,6 +338,7 @@ export async function deletePost(id: string) {
       where: { id },
     });
 
+    updateTag(`blog-${post.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${post.blogId}`);
     return { success: true };
   } catch (error) {
@@ -477,7 +481,7 @@ export async function translatePost(postId: string, targetLanguage: string) {
         blogId: originalPost.blogId,
         title: translatedTitle,
         slug: originalPost.slug, // Same slug, different language
-        content: translatedContent as any,
+        content: translatedContent as unknown as Prisma.InputJsonValue,
         excerpt: translatedExcerpt,
         coverImage: originalPost.coverImage, // Keep same image
         status: originalPost.status,
@@ -531,6 +535,7 @@ export async function translatePost(postId: string, targetLanguage: string) {
       });
     }
 
+    updateTag(`blog-${originalPost.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${originalPost.blogId}`);
     return { success: true, post: translatedPost };
   } catch (error) {
@@ -646,7 +651,7 @@ export async function syncPostTranslations(postId: string) {
           const updatedPost = await prisma.post.update({
             where: { id: translation.id },
             data: {
-              content: translatedContent as any,
+              content: translatedContent as unknown as Prisma.InputJsonValue,
               // Sync non-language-specific fields
               coverImage: currentPost.coverImage,
               ogImage: currentPost.ogImage,
@@ -733,6 +738,7 @@ export async function syncPostTranslations(postId: string) {
         ? failedSyncs.map((f) => `Failed to sync ${f.language}: ${f.error}`).join("; ")
         : undefined;
 
+    updateTag(`blog-${currentPost.blogId}-posts`);
     revalidatePath(`/dashboard/blogs/${currentPost.blogId}`);
     return {
       success: true,

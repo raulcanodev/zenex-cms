@@ -151,7 +151,7 @@ Preserve the meaning, tone, and style. Return only the translated text without a
             return block;
 
           case "quote":
-            const quoteData: any = { ...block.data };
+            const quoteData = { ...block.data };
             if (block.data?.text) {
               quoteData.text = await this.translateText(
                 block.data.text,
@@ -172,7 +172,7 @@ Preserve the meaning, tone, and style. Return only the translated text without a
             };
 
           case "linkTool":
-            const linkData: any = { ...block.data };
+            const linkData = { ...block.data };
             if (block.data?.title) {
               linkData.title = await this.translateText(
                 block.data.title,
@@ -193,7 +193,7 @@ Preserve the meaning, tone, and style. Return only the translated text without a
             };
 
           case "image":
-            const imageData: any = { ...block.data };
+            const imageData = { ...block.data };
             if (block.data?.caption) {
               imageData.caption = await this.translateText(
                 block.data.caption,

@@ -1,11 +1,5 @@
 declare module "@editorjs/link" {
-  const LinkTool: any;
+  import type { BlockToolConstructable } from "@editorjs/editorjs";
+  const LinkTool: BlockToolConstructable;
   export default LinkTool;
 }
-
-declare module "@editorjs/image" {
-  const Image: any;
-  export default Image;
-}
-
-

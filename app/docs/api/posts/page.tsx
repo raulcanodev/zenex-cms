@@ -29,7 +29,10 @@ export default function PostsApiDocsPage() {
           <DocsSection id="parameters" title="Query Parameters">
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><code className="rounded bg-muted px-1.5 py-0.5">page</code> - Page number (default: 1)</li>
-              <li><code className="rounded bg-muted px-1.5 py-0.5">limit</code> - Posts per page (default: 10)</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">limit</code> - Posts per page (1–100, default: 10)</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">status</code> - Only published posts are public. Draft/all requests return 400.</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">includeContent</code> - Set false to omit content and HTML on list pages (default: true).</li>
+              <li><code className="rounded bg-muted px-1.5 py-0.5">tag</code> - Filter by tag ID (optional).</li>
               <li><code className="rounded bg-muted px-1.5 py-0.5">category</code> - Filter by category ID (optional)</li>
               <li>
                 <code className="rounded bg-muted px-1.5 py-0.5">language</code> - Filter by language code (ISO 639-1, optional)

@@ -1,15 +1,12 @@
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GitHubProvider from "next-auth/providers/github";
+import { githubProvider } from "./github-provider";
 import type { NextAuthConfig } from "next-auth";
 
 export const authOptions: NextAuthConfig = {
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-    }),
+    githubProvider,
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -61,22 +58,16 @@ export const authOptions: NextAuthConfig = {
     signIn: "/",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "github") {
         try {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email || "" },
+          if (!user.email) return false;
+          const dbUser = await prisma.user.upsert({
+            where: { email: user.email },
+            update: {},
+            create: { email: user.email, name: user.name, password: null },
           });
-
-          if (!existingUser) {
-            await prisma.user.create({
-              data: {
-                email: user.email || "",
-                name: user.name || "",
-                password: "", // OAuth users don't have passwords
-              },
-            });
-          }
+          user.id = dbUser.id;
         } catch (error) {
           console.error("Error creating GitHub user:", error);
           return false;
@@ -84,17 +75,9 @@ export const authOptions: NextAuthConfig = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-      }
-      if (account?.provider === "github") {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email || "" },
-        });
-        if (dbUser) {
-          token.id = dbUser.id;
-        }
       }
       return token;
     },

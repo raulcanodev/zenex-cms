@@ -255,8 +255,10 @@ GET /api/blogs/{blogId}/tags
 
 Query parameters:
 - `page`: Page number (default: 1)
+- `includeContent`: Set to `false` for lightweight lists without Editor.js JSON or HTML (default: `true`).
+- `tag`: Filter by tag ID.
 - `limit`: Items per page (default: 10)
-- `status`: Filter by status (`published`, `draft`)
+- `status`: Public API only accepts `published` (the default). Drafts remain accessible through the authenticated dashboard.
 - `language`: Filter by language code (e.g., `en`, `es`)
 - `category`: Filter by category ID
 - `orderBy`: Sort field (`publishedAt`, `createdAt`, `title`)

@@ -1,16 +1,15 @@
 # Dockerfile optimizado para Next.js en Dokploy
 # Evita que se acumulen capas innecesarias
 
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 
 # 1. Instalar dependencias (solo cuando package.json cambia)
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-# Si existe package-lock.json usa npm ci, sino npm install
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # 2. Build de la aplicación
 FROM base AS builder

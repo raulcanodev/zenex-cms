@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
-import { getPostsByBlogId, getAvailableLanguagesBySlug } from "@/src/server/services/posts/queries";
+import { getPostsByBlogId, getPublishedLanguagesByGroup } from "@/src/server/services/posts/queries";
+import { publicPostsQuery } from "@/lib/public-api";
 import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 // Cache the GET response for 60 seconds, revalidate in background
@@ -14,44 +15,45 @@ export async function GET(
     const { blogId } = await params;
     const { searchParams } = new URL(request.url);
 
+    const parsed = publicPostsQuery.safeParse(Object.fromEntries(searchParams));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid query parameters", details: parsed.error.flatten().fieldErrors }, { status: 400 });
+    }
+    const { page, limit, status, category: categoryId, tag: tagId, language, orderBy, order, includeContent } = parsed.data;
+
     // Verify blog exists
     const blog = await getBlogByBlogId(blogId);
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const statusParam = searchParams.get("status");
-    const status = statusParam || undefined; // undefined = all posts, "published" = only published, "draft" = only drafts
-    const categoryId = searchParams.get("category") || undefined;
-    const languageParam = searchParams.get("language");
-    const language = languageParam && languageParam.trim() ? languageParam : undefined;
-    const orderByParam = searchParams.get("orderBy") as "publishedAt" | "createdAt" | "title" | null;
-    const orderBy = orderByParam || "publishedAt";
-    const orderParam = searchParams.get("order") as "asc" | "desc" | null;
-    const order = orderParam || "desc";
-
     const { posts, pagination } = await getPostsByBlogId(blog.id, {
       page,
       limit,
       status,
       categoryId,
+      tagId,
+      includeContent,
       language,
       orderBy,
       order,
     });
 
-    // Format response for API
-    const formattedPosts = await Promise.all(
-      posts.map(async (post) => {
-        const availableLanguages = await getAvailableLanguagesBySlug(blog.id, post.slug);
+    const languagesByGroup = await getPublishedLanguagesByGroup(
+      blog.id, posts.flatMap(post => post.translationGroupId ? [post.translationGroupId] : [])
+    );
+    const formattedPosts = posts.map((post) => {
+        const availableLanguages = post.translationGroupId
+          ? languagesByGroup[post.translationGroupId] || [post.language]
+          : [post.language];
         return {
           id: post.id,
           title: post.title,
           slug: post.slug,
-          content: post.content, // Include content for testing/example purposes
-          html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
+          ...(includeContent ? {
+            content: post.content,
+            html: convertBlocksToHtml(post.content),
+          } : {}),
           excerpt: post.excerpt,
           coverImage: post.coverImage,
           language: post.language,
@@ -79,8 +81,7 @@ export async function GET(
           keywords: post.keywords,
           availableLanguages,
         };
-      })
-    );
+      });
 
     return NextResponse.json({
       data: formattedPosts,

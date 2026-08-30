@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -413,7 +414,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
                       key={translation.id}
                       type="button"
                       onClick={() => router.push(`/dashboard/blogs/${blogId}/posts/${translation.id}/edit`)}
-                      className="inline-flex items-center gap-1 rounded-md border bg-card px-2 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                       {lang?.name || translation.language}
                     </button>
@@ -605,3 +606,4 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
     </form>
   );
 }
+

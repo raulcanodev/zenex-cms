@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Necesario para Docker - genera build optimizado
   output: 'standalone',
+  turbopack: { root: process.cwd() },
   
   // Configuración de imágenes
   images: {

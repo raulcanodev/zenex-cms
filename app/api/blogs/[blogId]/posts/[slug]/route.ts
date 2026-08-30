@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
-import { getPostBySlug, getPostBySlugAndLanguage, getAvailableLanguagesBySlug } from "@/src/server/services/posts/queries";
+import { getPostBySlug, getPostBySlugAndLanguage, getPublishedLanguagesByGroup } from "@/src/server/services/posts/queries";
 import { convertBlocksToHtml } from "@/lib/editorjs-to-html";
 
 // Cache the GET response for 60 seconds, revalidate in background
@@ -34,7 +34,12 @@ export async function GET(
     }
 
     // Get available languages for this post
-    const availableLanguages = await getAvailableLanguagesBySlug(blog.id, slug);
+    const languagesByGroup = await getPublishedLanguagesByGroup(
+      blog.id, post.translationGroupId ? [post.translationGroupId] : []
+    );
+    const availableLanguages = post.translationGroupId
+      ? languagesByGroup[post.translationGroupId] || [post.language]
+      : [post.language];
 
     // Format response for API
     const formattedPost = {
@@ -42,7 +47,7 @@ export async function GET(
       title: post.title,
       slug: post.slug,
       content: post.content,
-      html: convertBlocksToHtml((post.content as any)?.blocks), // Added html field
+      html: convertBlocksToHtml(post.content), // Added html field
       excerpt: post.excerpt,
       coverImage: post.coverImage,
       language: post.language,
@@ -50,12 +55,12 @@ export async function GET(
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      categories: post.categories?.map((pc: any) => ({
+      categories: post.categories?.map((pc) => ({
         id: pc.category.id,
         name: pc.category.name,
         slug: pc.category.slug,
       })) || [],
-      tags: post.tags?.map((pt: any) => ({
+      tags: post.tags?.map((pt) => ({
         id: pt.tag.id,
         name: pt.tag.name,
         slug: pt.tag.slug,

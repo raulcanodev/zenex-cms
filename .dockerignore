@@ -15,7 +15,8 @@ build
 
 # Env files (no copiar secrets al build)
 .env
-.env*.local
+.env.*
+!.env.example
 
 # Git
 .git
