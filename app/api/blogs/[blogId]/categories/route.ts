@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBlogByBlogId } from "@/src/server/services/blogs/queries";
 import { getCategoriesByBlogIdCached } from "@/src/server/services/categories/queries";
-// Cache the GET response for 1 hour (categories change infrequently)
-export const revalidate = 3600;
+// Match the category data cache; mutations invalidate its tag immediately.
+export const revalidate = 60;
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ blogId: string }> }
@@ -39,4 +39,3 @@ export async function GET(
     );
   }
 }
-

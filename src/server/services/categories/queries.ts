@@ -25,9 +25,9 @@ export async function getCategoriesByBlogIdCached(blogId: string) {
     },
     [`categories-${blogId}`],
     {
-      revalidate: 3600,
+      revalidate: 60,
+      tags: [`blog-${blogId}-categories`],
     }
   )();
 }
-
 

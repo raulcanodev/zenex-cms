@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
 
 const createCategorySchema = z.object({
@@ -70,6 +70,8 @@ export async function createCategory(data: {
       data: validated,
     });
 
+    updateTag(`blog-${data.blogId}-categories`);
+    revalidatePath(`/api/blogs/${data.blogId}/categories`);
     revalidatePath(`/dashboard/blogs/${data.blogId}`);
     return { success: true, category };
   } catch (error) {
@@ -138,6 +140,9 @@ export async function updateCategory(
       data: validated,
     });
 
+    updateTag(`blog-${category.blogId}-categories`);
+    updateTag(`blog-${category.blogId}-posts`);
+    revalidatePath(`/api/blogs/${category.blogId}/categories`);
     revalidatePath(`/dashboard/blogs/${category.blogId}`);
     return { success: true, category: updatedCategory };
   } catch (error) {
@@ -180,10 +185,12 @@ export async function deleteCategory(id: string) {
       where: { id },
     });
 
+    updateTag(`blog-${category.blogId}-categories`);
+    updateTag(`blog-${category.blogId}-posts`);
+    revalidatePath(`/api/blogs/${category.blogId}/categories`);
     revalidatePath(`/dashboard/blogs/${category.blogId}`);
     return { success: true };
   } catch (error) {
     return { error: "Failed to delete category" };
   }
 }
-
