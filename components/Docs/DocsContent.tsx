@@ -29,7 +29,7 @@ export function DocsContent() {
         {/* Next.js Section */}
         <DocsSection id="nextjs" title="Get started with Next.js">
           <p className="mb-4 text-muted-foreground">
-            Create a blog in your dashboard and copy your <strong>Blog ID</strong>. All API requests use your public Blog ID - no authentication required.
+            Create a blog in your dashboard and copy your <strong>Blog ID</strong>. Public GET requests return published posts without authentication. Drafts and writes use the private API with a scoped key.
           </p>
           <DocsCodeBlock
             language="typescript"

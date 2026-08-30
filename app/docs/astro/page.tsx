@@ -27,15 +27,16 @@ List posts with pagination.
 
 Query Parameters:
 - page: number (default: 1)
-- limit: number (default: 10)
-- status: string ('published' | 'draft', optional - defaults to all posts)
+- limit: number (1–100, default: 10)
+- status: 'published' (the default and only accepted value)
+- includeContent: 'true' | 'false' (default: 'true'; false omits content and html)
 - category: string (category ID, optional)
 - tag: string (tag ID, optional)
 - language: string (ISO 639-1 code like 'en', 'es', 'fr', optional)
 - orderBy: string ('publishedAt' | 'createdAt' | 'title', default: 'publishedAt')
 - order: string ('asc' | 'desc', default: 'desc')
 
-⚠️ IMPORTANT: By default, this endpoint returns ALL posts (including drafts). For public blogs, always add status=published to the URL.
+Public endpoints only return published posts; status=draft and status=all return 400. Read drafts or write content through /api/v1/blogs/{blogId} with a scoped API key, documented at /docs/api/management. Never expose private keys in PUBLIC_* variables. List responses are paginated: iterate all pages when building a complete archive.
 
 Response:
 {

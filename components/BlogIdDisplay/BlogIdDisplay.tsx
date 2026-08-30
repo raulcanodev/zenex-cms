@@ -23,7 +23,7 @@ export function BlogIdDisplay({ blogId }: BlogIdDisplayProps) {
       <CardHeader>
         <CardTitle>Blog ID</CardTitle>
         <CardDescription>
-          Use this ID to fetch your blogs content through the API.
+          Public identifier for published content, not a secret. Manage private access in API keys.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -37,5 +37,4 @@ export function BlogIdDisplay({ blogId }: BlogIdDisplayProps) {
     </Card>
   );
 }
-
 

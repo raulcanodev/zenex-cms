@@ -16,11 +16,13 @@ export function BlogNavigation({ blogId }: BlogNavigationProps) {
     { href: `${basePath}/authors`, label: "Authors" },
     { href: `${basePath}/categories`, label: "Categories" },
     { href: `${basePath}/settings`, label: "Settings" },
+    { href: `${basePath}/mcp`, label: "MCP" },
+    { href: `${basePath}/api-keys`, label: "API keys" },
   ];
 
   return (
     <nav className="border-b bg-white dark:bg-zinc-900">
-      <div className="mx-auto flex w-full max-w-[1000px] gap-8 px-6">
+      <div className="mx-auto flex w-full max-w-[1000px] gap-6 overflow-x-auto px-6">
         {navItems.map((item) => {
           const checkPath = item.matchPath || item.href;
           const isActive = pathname === item.href || pathname?.startsWith(`${checkPath}/`);
@@ -28,7 +30,7 @@ export function BlogNavigation({ blogId }: BlogNavigationProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`border-b-2 px-1 py-4 text-sm transition-colors ${
+              className={`shrink-0 border-b-2 px-1 py-4 text-sm transition-colors ${
                 isActive
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
@@ -42,4 +44,3 @@ export function BlogNavigation({ blogId }: BlogNavigationProps) {
     </nav>
   );
 }
-

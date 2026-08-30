@@ -51,6 +51,14 @@ export default function DocsPage() {
                 Explore our REST API endpoints:
               </p>
               <div className="space-y-3">
+                <Link href="/docs/api/management" className="block rounded-lg border p-4 transition-colors hover:border-foreground">
+                  <span className="font-semibold">Private REST API & API keys →</span>
+                  <p className="mt-2 text-sm text-muted-foreground">Scoped access to posts, categories, tags, authors, images and blog metadata.</p>
+                </Link>
+                <Link href="/docs/mcp" className="block rounded-lg border p-4 transition-colors hover:border-foreground">
+                  <span className="font-semibold">Connect an agent with MCP →</span>
+                  <p className="mt-2 text-sm text-muted-foreground">Local stdio and remote Streamable HTTP setup.</p>
+                </Link>
                 <Link
                   href="/docs/api/posts"
                   className="block rounded-lg border p-4 hover:border-foreground transition-colors"
@@ -112,7 +120,7 @@ export default function DocsPage() {
                 </Link>
               </div>
               <ul className="space-y-2 text-muted-foreground">
-                <li>• <strong>No authentication</strong> - Public API using Blog ID</li>
+                <li>• <strong>Public delivery</strong> - Published content uses the public Blog ID; drafts and writes require a scoped API key</li>
                 <li>• <strong>Pagination</strong> - Built-in pagination support</li>
                 <li>• <strong>Rich content</strong> - Editor.js format for flexible content</li>
                 <li>• <strong>SEO ready</strong> - Meta tags and Open Graph included</li>

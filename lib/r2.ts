@@ -15,16 +15,6 @@ export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "";
 export const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
 /**
- * Generate a unique filename
- */
-export function generateFileName(originalName: string): string {
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 15);
-  const extension = originalName.split('.').pop();
-  return `${timestamp}-${randomString}.${extension}`;
-}
-
-/**
  * Get the upload path for a blog
  */
 export function getBlogUploadPath(blogId: string, filename: string): string {

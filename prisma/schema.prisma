@@ -37,9 +37,29 @@ model Blog {
   tags       Tag[]
   authors    Author[]
   members    BlogMember[]
+  apiKeys    ApiKey[]
 
   @@index([userId])
   @@index([blogId])
+}
+
+// Secrets are shown once; only SHA-256 digests of 256-bit random tokens are stored.
+model ApiKey {
+  id             String    @id @default(cuid())
+  blogId         String
+  name           String
+  prefix         String
+  tokenHash      String    @unique
+  scopes         String[]
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  lastUsedAt     DateTime?
+  rateWindow     DateTime  @default(now())
+  rateCount      Int       @default(0)
+  blog           Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@index([blogId, createdAt])
 }
 
 model Post {

@@ -19,9 +19,9 @@ export async function getTagsByBlogIdCached(blogId: string) {
     },
     [`tags-${blogId}`],
     {
-      revalidate: 3600,
+      revalidate: 60,
+      tags: [`blog-${blogId}-tags`],
     }
   )();
 }
-
 

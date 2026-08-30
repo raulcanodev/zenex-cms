@@ -1,44 +1,16 @@
 "use server";
 
-import type { Prisma } from "@prisma/client";
+import type { Prisma, Post } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/get-session";
-import { z } from "zod";
 import { revalidatePath, updateTag } from "next/cache";
 import type { OutputData } from "@editorjs/editorjs";
 import { isValidLanguageCode } from "@/lib/languages";
 import { v4 as uuidv4 } from "uuid";
 import { TranslationService } from "@/src/server/services/translations/TranslationService";
 import { userHasAccessToBlog } from "@/src/server/services/blogs/members/mutations";
-
-const createPostSchema = z.object({
-  blogId: z.string(),
-  title: z.string().min(1),
-  slug: z.string().min(1),
-  content: z.any(), // Editor.js JSON
-  excerpt: z.string().optional(),
-  coverImage: z.string().optional(),
-  status: z.enum(["draft", "published"]).default("draft"),
-  featured: z.boolean().optional(),
-  publishedAt: z.date().optional(),
-  authorId: z.string().optional(),
-  language: z.string().refine((val) => isValidLanguageCode(val), {
-    message: "Invalid language code",
-  }),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  ogImage: z.string().optional(),
-  ogTitle: z.string().optional(),
-  ogDescription: z.string().optional(),
-  canonicalUrl: z.string().optional(),
-  keywords: z.string().optional(),
-  categoryIds: z.array(z.string()).optional(),
-  tagIds: z.array(z.string()).optional(),
-});
-
-const updatePostSchema = createPostSchema.partial().extend({
-  blogId: z.string(),
-});
+import { dashboardOperation, recordBlogId } from "@/src/server/services/content/dashboard";
+import { apiError } from "@/lib/integrations/errors";
 
 export async function createPost(data: {
   blogId: string;
@@ -62,100 +34,13 @@ export async function createPost(data: {
   categoryIds?: string[];
   tagIds?: string[];
 }) {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    // Verify blog access (owner or member)
-    const blog = await prisma.blog.findUnique({
-      where: { id: data.blogId },
-    });
-
-    if (!blog) {
-      return { error: "Blog not found" };
-    }
-
-    const hasAccess = await userHasAccessToBlog(
-      session.user.id,
-      session.user.email || "",
-      data.blogId
-    );
-
-    if (!hasAccess) {
-      return { error: "Unauthorized" };
-    }
-
-    const validated = createPostSchema.parse(data);
-
-    // Check if slug already exists for this blog and language
-    const existingPost = await prisma.post.findUnique({
-      where: {
-        blogId_slug_language: {
-          blogId: data.blogId,
-          slug: validated.slug,
-          language: validated.language,
-        },
-      },
-    });
-
-    if (existingPost) {
-      return { error: "Post with this slug already exists in this language" };
-    }
-
-    // Generate translationGroupId if not provided (for new posts)
-    const translationGroupId = uuidv4();
-
-    const post = await prisma.post.create({
-      data: {
-        blogId: validated.blogId,
-        title: validated.title,
-        slug: validated.slug,
-        content: validated.content,
-        excerpt: validated.excerpt,
-        coverImage: validated.coverImage,
-        status: validated.status,
-        featured: validated.featured ?? false,
-        publishedAt: validated.status === "published" && !validated.publishedAt 
-          ? new Date() 
-          : validated.publishedAt,
-        authorId: validated.authorId,
-        language: validated.language,
-        translationGroupId,
-        metaTitle: validated.metaTitle,
-        metaDescription: validated.metaDescription,
-        ogImage: validated.ogImage,
-        ogTitle: validated.ogTitle,
-        ogDescription: validated.ogDescription,
-        canonicalUrl: validated.canonicalUrl,
-        keywords: validated.keywords,
-        categories: validated.categoryIds
-          ? {
-              create: validated.categoryIds.map((categoryId) => ({
-                categoryId,
-              })),
-            }
-          : undefined,
-        tags: validated.tagIds
-          ? {
-              create: validated.tagIds.map((tagId) => ({
-                tagId,
-              })),
-            }
-          : undefined,
-      },
-    });
-
-    updateTag(`blog-${data.blogId}-posts`);
-    revalidatePath(`/dashboard/blogs/${data.blogId}`);
+    const { blogId, publishedAt, ...fields } = data;
+    const post = await dashboardOperation(blogId, "create_posts", {
+      ...fields, ...(publishedAt ? { publishedAt: publishedAt.toISOString() } : {}),
+    }) as Post;
     return { success: true, post };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { error: error.issues[0].message };
-    }
-    return { error: "Failed to create post" };
-  }
+  } catch (error) { return { error: apiError(error).error }; }
 }
 
 export async function updatePost(
@@ -182,168 +67,21 @@ export async function updatePost(
     tagIds?: string[];
   }
 ) {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    const post = await prisma.post.findUnique({
-      where: { id },
-      include: {
-        blog: true,
-      },
-    });
-
-    if (!post) {
-      return { error: "Post not found" };
-    }
-
-    const hasAccess = await userHasAccessToBlog(
-      session.user.id,
-      session.user.email || "",
-      post.blogId
-    );
-
-    if (!hasAccess) {
-      return { error: "Unauthorized" };
-    }
-
-    const validated = updatePostSchema.partial().parse({
-      blogId: post.blogId,
-      ...data,
-    });
-
-    // Validate language code if provided
-    if (validated.language && !isValidLanguageCode(validated.language)) {
-      return { error: "Invalid language code" };
-    }
-
-    // Check slug uniqueness if updating slug or language
-    const newSlug = validated.slug || post.slug;
-    const newLanguage = validated.language || post.language;
-    
-    if ((validated.slug && validated.slug !== post.slug) || (validated.language && validated.language !== post.language)) {
-      const existingPost = await prisma.post.findUnique({
-        where: {
-          blogId_slug_language: {
-            blogId: post.blogId,
-            slug: newSlug,
-            language: newLanguage,
-          },
-        },
-      });
-
-      if (existingPost && existingPost.id !== id) {
-        return { error: "Post with this slug already exists in this language" };
-      }
-    }
-
-    // Handle categories and tags updates
-    if (validated.categoryIds !== undefined) {
-      await prisma.postCategory.deleteMany({
-        where: { postId: id },
-      });
-    }
-
-    if (validated.tagIds !== undefined) {
-      await prisma.postTag.deleteMany({
-        where: { postId: id },
-      });
-    }
-
-    const updatedPost = await prisma.post.update({
-      where: { id },
-      data: {
-        title: validated.title,
-        slug: validated.slug,
-        content: validated.content,
-        excerpt: validated.excerpt,
-        coverImage: validated.coverImage,
-        status: validated.status,
-        featured: validated.featured !== undefined ? validated.featured : undefined,
-        publishedAt:
-          validated.status === "published" && !post.publishedAt && !validated.publishedAt
-            ? new Date()
-            : validated.publishedAt,
-        authorId: validated.authorId,
-        language: validated.language,
-        metaTitle: validated.metaTitle,
-        metaDescription: validated.metaDescription,
-        ogImage: validated.ogImage,
-        ogTitle: validated.ogTitle,
-        ogDescription: validated.ogDescription,
-        canonicalUrl: validated.canonicalUrl,
-        keywords: validated.keywords,
-        categories:
-          validated.categoryIds !== undefined
-            ? {
-                create: validated.categoryIds.map((categoryId) => ({
-                  categoryId,
-                })),
-              }
-            : undefined,
-        tags:
-          validated.tagIds !== undefined
-            ? {
-                create: validated.tagIds.map((tagId) => ({
-                  tagId,
-                })),
-              }
-            : undefined,
-      },
-    });
-
-    updateTag(`blog-${post.blogId}-posts`);
-    revalidatePath(`/dashboard/blogs/${post.blogId}`);
-    revalidatePath(`/dashboard/blogs/${post.blogId}/posts/${id}`);
-    return { success: true, post: updatedPost };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { error: error.issues[0].message };
-    }
-    return { error: "Failed to update post" };
-  }
+    const blogId = await recordBlogId("posts", id);
+    const { publishedAt, ...fields } = data;
+    const post = await dashboardOperation(blogId, "update_posts", {
+      ...fields, id, ...(publishedAt ? { publishedAt: publishedAt.toISOString() } : {}),
+    }) as Post;
+    return { success: true, post };
+  } catch (error) { return { error: apiError(error).error }; }
 }
 
 export async function deletePost(id: string) {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    const post = await prisma.post.findUnique({
-      where: { id },
-      include: {
-        blog: true,
-      },
-    });
-
-    if (!post) {
-      return { error: "Post not found" };
-    }
-
-    const hasAccess = await userHasAccessToBlog(
-      session.user.id,
-      session.user.email || "",
-      post.blogId
-    );
-
-    if (!hasAccess) {
-      return { error: "Unauthorized" };
-    }
-
-    await prisma.post.delete({
-      where: { id },
-    });
-
-    updateTag(`blog-${post.blogId}-posts`);
-    revalidatePath(`/dashboard/blogs/${post.blogId}`);
+    await dashboardOperation(await recordBlogId("posts", id), "delete_posts", { id });
     return { success: true };
-  } catch (error) {
-    return { error: "Failed to delete post" };
-  }
+  } catch (error) { return { error: apiError(error).error }; }
 }
 
 export async function translatePost(postId: string, targetLanguage: string) {
@@ -755,4 +493,3 @@ export async function syncPostTranslations(postId: string) {
     return { error: "Failed to sync post translations" };
   }
 }
-

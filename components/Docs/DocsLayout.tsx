@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { config } from "@/data/config";
+import { DocsSidebar } from "./DocsSidebar";
 
 interface DocsLayoutProps {
   children: ReactNode;
@@ -22,6 +23,8 @@ export function DocsLayout({ children }: DocsLayoutProps) {
               variant="ghost"
               size="icon"
               className="mr-2 md:hidden"
+              aria-label={sidebarOpen ? "Close documentation navigation" : "Open documentation navigation"}
+              aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -58,10 +61,13 @@ export function DocsLayout({ children }: DocsLayoutProps) {
       <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10 px-4">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
+          <>
           <div
             className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
+          <DocsSidebar mobile onNavigate={() => setSidebarOpen(false)} />
+          </>
         )}
         
         {children}

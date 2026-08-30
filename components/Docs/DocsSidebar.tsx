@@ -22,6 +22,8 @@ const navigation: NavItem[] = [
   {
     title: "API Reference",
     items: [
+      { title: "Private REST API", href: "/docs/api/management" },
+      { title: "MCP & API keys", href: "/docs/mcp" },
       { title: "GET Posts", href: "/docs/api/posts" },
       { title: "GET Single Post", href: "/docs/api/post" },
       { title: "GET Categories", href: "/docs/api/categories" },
@@ -36,11 +38,11 @@ const navigation: NavItem[] = [
   },
 ];
 
-export function DocsSidebar() {
+export function DocsSidebar({ mobile = false, onNavigate }: { mobile?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed top-14 z-40 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 border-r md:block md:sticky md:top-14 md:h-[calc(100vh-3.5rem)]">
+    <aside className={mobile ? "fixed bottom-0 left-0 top-14 z-50 w-72 border-r bg-background px-4 md:hidden" : "fixed top-14 z-40 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 border-r md:block md:sticky md:top-14 md:h-[calc(100vh-3.5rem)]"}>
       <div className="h-full overflow-y-auto py-6 pr-6 lg:py-8">
         <nav className="space-y-6">
           {navigation.map((section) => (
@@ -52,6 +54,7 @@ export function DocsSidebar() {
                     <li key={item.href}>
                       <Link
                         href={item.href || "#"}
+                        onClick={onNavigate}
                         className={cn(
                           "block rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted",
                           pathname === item.href

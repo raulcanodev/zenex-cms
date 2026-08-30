@@ -82,8 +82,8 @@ export async function getBlogByBlogId(blogId: string) {
     [`blog-${blogId}`],
     {
       revalidate: 3600, // 1 hour
+      tags: [`blog-${blogId}`],
     }
   )();
 }
-
 
