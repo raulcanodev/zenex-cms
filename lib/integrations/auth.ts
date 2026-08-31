@@ -21,14 +21,14 @@ export async function authenticateApiKey(request: Request, publicBlogId?: string
     where: { tokenHash: hashApiKey(match[1]) },
     include: { blog: { select: { blogId: true } } },
   });
-  if (!key || key.revokedAt || key.expiresAt <= new Date()) throw new ApiError(401, "Invalid or expired API key");
+  if (!key || key.revokedAt || (!key.neverExpires && (!key.expiresAt || key.expiresAt <= new Date()))) throw new ApiError(401, "Invalid or expired API key");
   if (publicBlogId && key.blog.blogId !== publicBlogId) throw new ApiError(403, "API key does not grant access to this blog");
   const rows = await prisma.$queryRaw<{ id: string }[]>`
     UPDATE "ApiKey" SET
       "rateCount" = CASE WHEN "rateWindow" <= NOW() - INTERVAL '1 minute' THEN 1 ELSE "rateCount" + 1 END,
       "rateWindow" = CASE WHEN "rateWindow" <= NOW() - INTERVAL '1 minute' THEN NOW() ELSE "rateWindow" END,
       "lastUsedAt" = NOW()
-    WHERE "id" = ${key.id} AND "revokedAt" IS NULL AND "expiresAt" > NOW()
+    WHERE "id" = ${key.id} AND "revokedAt" IS NULL AND ("neverExpires" OR "expiresAt" > NOW())
       AND ("rateWindow" <= NOW() - INTERVAL '1 minute' OR "rateCount" < 120)
     RETURNING "id"
   `;

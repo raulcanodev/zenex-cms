@@ -52,7 +52,8 @@ model ApiKey {
   tokenHash      String    @unique
   scopes         String[]
   createdAt      DateTime  @default(now())
-  expiresAt      DateTime
+  expiresAt      DateTime?
+  neverExpires   Boolean   @default(false)
   revokedAt      DateTime?
   lastUsedAt     DateTime?
   rateWindow     DateTime  @default(now())

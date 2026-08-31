@@ -62,6 +62,7 @@ export const createKeySchema = z.object({
   scopes: z.array(z.enum(API_SCOPES)).min(1).max(API_SCOPES.length)
     .refine(v => new Set(v).size === v.length, "Duplicate scopes"),
   expiresInDays: z.number().int().min(1).max(365).default(90),
+  neverExpires: z.boolean().default(false),
 }).strict();
 
 export const imageUploadSchema = z.object({

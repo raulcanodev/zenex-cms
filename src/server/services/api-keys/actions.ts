@@ -19,9 +19,9 @@ export async function listApiKeys(blogId: string) {
   await requireOwner(blogId);
   const keys = await prisma.apiKey.findMany({ where: { blogId }, orderBy: { createdAt: "desc" }, take: 100, select: {
     id: true, name: true, prefix: true, scopes: true, createdAt: true,
-    expiresAt: true, revokedAt: true, lastUsedAt: true,
+    expiresAt: true, neverExpires: true, revokedAt: true, lastUsedAt: true,
   } });
-  return keys.map(key => ({ ...key, expired: key.expiresAt.getTime() <= Date.now() }));
+  return keys.map(key => ({ ...key, expired: !key.neverExpires && (!key.expiresAt || key.expiresAt.getTime() <= Date.now()) }));
 }
 
 export async function createApiKey(blogId: string, input: unknown) {
@@ -29,13 +29,13 @@ export async function createApiKey(blogId: string, input: unknown) {
     await requireOwner(blogId);
     const data = createKeySchema.parse(input);
     const { token, tokenHash, prefix } = generateApiKey();
-    const expiresAt = new Date(Date.now() + data.expiresInDays * 86_400_000);
+    const expiresAt = data.neverExpires ? null : new Date(Date.now() + data.expiresInDays * 86_400_000);
     await prisma.$transaction(async tx => {
       // Serialize issuance per blog so concurrent requests cannot bypass the cap.
       await tx.$queryRaw`SELECT "id" FROM "Blog" WHERE "id" = ${blogId} FOR UPDATE`;
-      const count = await tx.apiKey.count({ where: { blogId, revokedAt: null, expiresAt: { gt: new Date() } } });
+      const count = await tx.apiKey.count({ where: { blogId, revokedAt: null, OR: [{ neverExpires: true }, { expiresAt: { gt: new Date() } }] } });
       if (count >= 25) throw new ApiError(409, "Revoke an existing key before creating more (25 active keys maximum)");
-      await tx.apiKey.create({ data: { blogId, name: data.name, scopes: data.scopes, tokenHash, prefix, expiresAt } });
+      await tx.apiKey.create({ data: { blogId, name: data.name, scopes: data.scopes, tokenHash, prefix, expiresAt, neverExpires: data.neverExpires } });
     });
     revalidatePath(`/dashboard/blogs/${blogId}/api-keys`);
     return { token };

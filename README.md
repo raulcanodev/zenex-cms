@@ -97,7 +97,7 @@ Compatibility: stdio and stateless Streamable HTTP JSON. **No OAuth or legacy SS
 
 ## Security and operations
 
-- API keys contain 256 random bits, are stored as SHA-256 hashes, and expire in 1–365 days (90 by default). Up to 25 active keys per blog.
+- API keys contain 256 random bits, are stored as SHA-256 hashes, and expire in 1–365 days (90 by default), unless the owner enables Never expires. Up to 25 active keys per blog.
 - Only owners can list/create/revoke keys; members cannot escalate their permissions through key management. No key has account-wide access.
 - Revocation/expiry are checked on every HTTP request. Already-authorized in-flight work may finish.
 - A PostgreSQL atomic counter enforces 120 authenticated HTTP requests/minute/key across all instances and both transports. 429 includes Retry-After: 60.
@@ -121,7 +121,9 @@ npm run build
 npm start
 ```
 
-The new migration is `prisma/migrations/20260831010000_add_api_keys/migration.sql`. It adds ApiKey and does not modify existing content. For Docker/Dokploy, run migrations in a controlled release step with Prisma CLI and production DATABASE_URL available; the minimal runtime image does not include the Prisma CLI. Do not use migrate dev or db push in production. Do not run migrations automatically in every replica at startup.
+The initial API key migration is `prisma/migrations/20260831010000_add_api_keys/migration.sql`. It adds ApiKey and does not modify existing content. For Docker/Dokploy, run migrations in a controlled release step with Prisma CLI and production DATABASE_URL available; the minimal runtime image does not include the Prisma CLI. Do not use migrate dev or db push in production. Do not run migrations automatically in every replica at startup.
+
+The `20260831130000_add_api_key_never_expires` migration adds `neverExpires` and makes `expiresAt` optional. Existing keys issued for 365 days (within one minute of clock/transaction skew) become non-expiring without changing their tokens, permissions or revocation state. Their original expiry timestamp is retained for compatibility while the old release is still running; the new release ignores it when `neverExpires` is true. Apply this migration before deploying the new application. Newly created non-expiring keys store a null expiry.
 
 After deployment: sign in as owner, create a least-privilege key, verify list/create/update draft/category, confirm publication is denied without publish scope, test MCP initialize/list/call and stdio, revoke the key and confirm 401. Check another blog’s access is denied and public GET never returns the draft.
 
