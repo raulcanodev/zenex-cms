@@ -46,6 +46,8 @@ export async function createPost(data: {
 export async function updatePost(
   id: string,
   data: {
+    // Older dashboard forms send this; ownership always comes from the post.
+    blogId?: string;
     title?: string;
     slug?: string;
     content?: OutputData;
@@ -70,6 +72,7 @@ export async function updatePost(
   try {
     const blogId = await recordBlogId("posts", id);
     const { publishedAt, ...fields } = data;
+    delete fields.blogId;
     const post = await dashboardOperation(blogId, "update_posts", {
       ...fields, id, ...(publishedAt ? { publishedAt: publishedAt.toISOString() } : {}),
     }) as Post;

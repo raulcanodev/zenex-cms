@@ -127,6 +127,32 @@
   padding: 0.5rem !important;
 }
 
+/* Keep the table grid enclosed without clipping its row/column toolboxes. */
+.codex-editor .tc-wrap {
+  --color-border: rgb(var(--border));
+  --color-background: rgb(var(--muted));
+  --color-text-secondary: rgb(var(--muted-foreground));
+  color: rgb(var(--foreground));
+}
+
+.codex-editor .tc-table {
+  border: 1px solid var(--color-border);
+  min-width: 0;
+}
+
+.codex-editor .tc-cell:last-child {
+  border-right: 0;
+}
+
+.codex-editor .tc-row:last-child {
+  border-bottom: 0;
+}
+
+.codex-editor .tc-table--heading .tc-row:first-child {
+  background-color: rgb(var(--muted));
+  font-weight: 700;
+}
+
 /* Link Tool */
 .codex-editor .link-tool {
   border: 1px solid rgb(var(--border)) !important;
@@ -229,4 +255,3 @@
 .dark .codex-editor .link-tool:hover {
   background-color: rgb(var(--muted) / 0.3) !important;
 }
-

@@ -8,6 +8,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { API_SCOPES } from "@/lib/integrations/scopes";
 import { draftExample } from "@/lib/integrations/examples";
+import { editorGuide } from "@/lib/integrations/editor-guide";
 
 const state = vi.hoisted(() => ({ db: null as unknown as PrismaClient, session: null as null | { user: { id: string; email: string } } }));
 vi.mock("@/lib/prisma", () => ({ get prisma() { return state.db; } }));
@@ -203,10 +204,19 @@ describe.runIf(!!connection)("isolated PostgreSQL management integration", () =>
     const transport = new StdioClientTransport({ command: process.execPath, args: [resolve("scripts/mcp-stdio.mjs")], env: { ZENEX_CMS_URL: `http://127.0.0.1:${address.port}`, ZENEX_API_KEY: token }, stderr: "pipe" });
     try {
       await client.connect(transport);
-      expect((await client.listTools()).tools).toHaveLength(23);
-      const result = await client.callTool({ name: "create_posts", arguments: draftExample });
+      expect((await client.listTools()).tools).toHaveLength(24);
+      const guide = await client.callTool({ name: "get_editor_guide", arguments: {} });
+      expect(guide.isError).not.toBe(true);
+      expect(guide.structuredContent).toHaveProperty("blocks");
+      const content = { blocks: editorGuide.blocks.map(block => block.example) };
+      const result = await client.callTool({ name: "create_posts", arguments: { ...draftExample, content } });
       expect(result.isError).not.toBe(true);
       expect(await state.db.post.count({ where: { blogId: blog.id } })).toBe(1);
+      const saved = await state.db.post.findFirstOrThrow({ where: { blogId: blog.id } });
+      expect(saved.content).toEqual(content);
+      const edited = { blocks: content.blocks.map(block => block.type === "table" ? { ...block, data: { ...block.data, withHeadings: false } } : block) };
+      expect((await client.callTool({ name: "update_posts", arguments: { id: saved.id, content: edited } })).isError).not.toBe(true);
+      expect((await state.db.post.findUniqueOrThrow({ where: { id: saved.id } })).content).toEqual(edited);
       await revokeApiKey(blog.id, keyId);
       expect((await client.callTool({ name: "get_blog", arguments: {} })).isError).toBe(true);
     } finally {

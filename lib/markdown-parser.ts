@@ -62,31 +62,37 @@ export function parseMarkdownWithFrontmatter(markdown: string): ParsedMarkdown {
 /**
  * Parse a markdown table to EditorJS table format
  */
-function parseMarkdownTable(rows: string[]): { content: string[][] } | null {
+function tableCells(row: string): string[] {
+  return row.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+}
+
+function isTableSeparator(row: string): boolean {
+  return tableCells(row).every(cell => /^:?-{3,}:?$/.test(cell));
+}
+
+function parseMarkdownTable(rows: string[]): { content: string[][]; withHeadings: boolean } | null {
   if (rows.length < 2) return null;
 
   const content: string[][] = [];
+  const withHeadings = isTableSeparator(rows[1]);
   
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     
     // Skip separator row (contains ---, :-:, etc.)
-    if (row.includes('---') || row.includes(':-:') || row.includes(':--')) {
+    if (i === 1 && withHeadings) {
       continue;
     }
 
     // Parse cells
-    const cells = row
-      .split('|')
-      .map(cell => cell.trim())
-      .filter(cell => cell !== ''); // Remove empty cells from start/end
+    const cells = tableCells(row);
 
     if (cells.length > 0) {
       content.push(cells);
     }
   }
 
-  return content.length > 0 ? { content } : null;
+  return content.length > 0 ? { content, withHeadings } : null;
 }
 
 /**
@@ -96,7 +102,7 @@ export function markdownToEditorJS(markdown: string): {
   time: number; 
   blocks: Array<{ 
     type: string; 
-    data: Record<string, string | number | string[][]> 
+    data: Record<string, string | number | boolean | string[][]>
   }>; 
   version: string 
 } {
@@ -146,7 +152,7 @@ export function markdownToEditorJS(markdown: string): {
     if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
       // Check if it's a table
       const nextLine = i + 1 < lines.length ? lines[i + 1] : '';
-      const isTableHeader = nextLine.includes('---') || nextLine.includes(':-:') || nextLine.includes(':--');
+      const isTableHeader = isTableSeparator(nextLine);
       
       if (isTableHeader || currentParagraph === '') {
         // Start accumulating table

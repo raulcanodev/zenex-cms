@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isValidLanguageCode } from "../languages";
 import { API_SCOPES } from "./scopes";
+import { EDITOR_CONTENT_DESCRIPTION } from "./editor-guide";
 
 export const idSchema = z.string().min(1).max(128);
 const name = z.string().trim().min(1).max(300);
@@ -18,7 +19,7 @@ export const editorContentSchema = z.object({
     data: z.record(z.string(), z.json()),
     tunes: z.record(z.string(), z.json()).optional(),
   }).strict()).max(1000),
-}).strict();
+}).strict().describe(EDITOR_CONTENT_DESCRIPTION);
 
 export const postCreateSchema = z.object({
   title: name, slug, content: editorContentSchema,

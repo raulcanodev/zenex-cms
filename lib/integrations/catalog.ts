@@ -11,8 +11,8 @@ export const OPERATIONS: Operation[] = [
   ...CONTENT_RESOURCES.flatMap(resource => ([
     { name: `list_${resource}`, method: "GET", path: `/${resource}`, scope: "content:read", description: `List ${resource}, paginated. Posts include drafts; results are private.` },
     { name: `get_${resource}`, method: "GET", path: `/${resource}/{id}`, scope: "content:read", description: `Read one ${resource} record by its internal ID, not its slug.` },
-    { name: `create_${resource}`, method: "POST", path: `/${resource}`, scope: "content:write", description: `Create ${resource}. Posts default to draft; publishing additionally requires content:publish. Use Editor.js JSON for content.` },
-    { name: `update_${resource}`, method: "PATCH", path: `/${resource}/{id}`, scope: "content:write", description: `Update only supplied fields in ${resource}. Editing a published post or changing publication state additionally requires content:publish.` },
+    { name: `create_${resource}`, method: "POST", path: `/${resource}`, scope: "content:write", description: `Create ${resource}. Posts default to draft; publishing additionally requires content:publish. Use Editor.js JSON for content.${resource === "posts" ? " Supports every dashboard block, including tables with header rows. MCP clients: call get_editor_guide for examples." : ""}` },
+    { name: `update_${resource}`, method: "PATCH", path: `/${resource}/{id}`, scope: "content:write", description: `Update only supplied fields in ${resource}. Editing a published post or changing publication state additionally requires content:publish.${resource === "posts" ? " Supplied content replaces the entire document: call get_posts first and preserve untouched blocks. MCP clients: call get_editor_guide for block formats." : ""}` },
     { name: `delete_${resource}`, method: "DELETE", path: `/${resource}/{id}`, scope: "content:delete", description: `Permanently delete ${resource}. Published posts additionally require content:publish. Ask the user before deleting.` },
   ] as Operation[])),
 ];

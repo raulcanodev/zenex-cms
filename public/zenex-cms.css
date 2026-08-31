@@ -1,5 +1,41 @@
 /* Zenex CMS Default Styles */
 
+/* Inherit the host blog's palette; these also style previously rendered tables. */
+.zenex-cms__table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.zenex-cms__table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--zenex-table-border, color-mix(in srgb, currentColor 30%, transparent));
+  color: inherit;
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+.zenex-cms__table th,
+.zenex-cms__table td {
+  border: 1px solid var(--zenex-table-border, color-mix(in srgb, currentColor 30%, transparent));
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  min-width: 6rem;
+  overflow-wrap: break-word;
+}
+
+.zenex-cms__table th {
+  background-color: var(--zenex-table-heading-bg, color-mix(in srgb, currentColor 10%, transparent));
+  font-weight: 700;
+}
+
+.zenex-cms__table a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .zenex-cms__header {
   font-weight: 700;
   line-height: 1.2;
@@ -214,4 +250,3 @@ a.zenex-cms__link:hover {
     color: inherit;
   }
 }
-

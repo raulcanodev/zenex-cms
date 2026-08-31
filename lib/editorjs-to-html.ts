@@ -51,12 +51,16 @@ export function convertBlocksToHtml(content: unknown): string {
       }
       case "table": {
         if (!Array.isArray(data.content)) return "";
-        const rows = data.content.map((row, index) => {
-          if (!Array.isArray(row)) return "";
-          const tag = index === 0 && data.withHeadings ? "th" : "td";
-          return `<tr>${row.map(cell => `<${tag}>${text(cell)}</${tag}>`).join("")}</tr>`;
-        }).join("");
-        return `<table class="zenex-cms__table"><tbody>${rows}</tbody></table>`;
+        const rows = data.content.filter(Array.isArray);
+        if (!rows.length) return "";
+        const renderRow = (row: unknown[], heading = false) => {
+          const tag = heading ? "th" : "td";
+          return `<tr>${row.map(cell => `<${tag}${heading ? ' scope="col"' : ""}>${text(cell)}</${tag}>`).join("")}</tr>`;
+        };
+        const hasHeadings = data.withHeadings === true;
+        const head = hasHeadings ? `<thead>${renderRow(rows[0], true)}</thead>` : "";
+        const body = rows.slice(hasHeadings ? 1 : 0).map(row => renderRow(row)).join("");
+        return `<div class="zenex-cms__table-wrapper"><table class="zenex-cms__table">${head}<tbody>${body}</tbody></table></div>`;
       }
       case "raw":
         return text(data.html);

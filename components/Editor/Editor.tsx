@@ -72,6 +72,8 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             class: Table as any,
             inlineToolbar: true,
+            // Only new blocks get headings; existing tables retain their choice.
+            toolbox: { title: "Table", data: { withHeadings: true } },
             config: {
               rows: 2,
               cols: 3,
@@ -153,4 +155,3 @@ export function Editor({ data, onChange, placeholder, blogId }: EditorProps) {
     </div>
   );
 }
-

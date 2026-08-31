@@ -30,14 +30,7 @@ interface ParsedPost {
   filename: string;
   frontmatter: Record<string, string | boolean | number>;
   content: string;
-  editorContent: { 
-    time: number; 
-    blocks: Array<{ 
-      type: string; 
-      data: Record<string, string | number | string[][]> 
-    }>; 
-    version: string 
-  };
+  editorContent: ReturnType<typeof markdownToEditorJS>;
 }
 
 const STEPS = [

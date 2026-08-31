@@ -140,7 +140,6 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
     setIsLoading(true);
 
     const postData = {
-      blogId,
       title,
       slug: computedSlug || slugify(title),
       content,
@@ -164,7 +163,7 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
 
     const result = isEditing
       ? await updatePost(post.id, postData)
-      : await createPost(postData);
+      : await createPost({ ...postData, blogId });
 
     if (result.error) {
       setError(result.error);
@@ -606,4 +605,3 @@ export function PostForm({ blogId, post, categories, tags, authors, existingTran
     </form>
   );
 }
-

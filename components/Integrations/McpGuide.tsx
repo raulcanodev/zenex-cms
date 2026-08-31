@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { DocsCodeBlock } from "@/components/Docs/DocsCodeBlock";
 import { stdioConfig } from "@/lib/integrations/examples";
+import { editorGuide } from "@/lib/integrations/editor-guide";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const subscribe = () => () => {};
@@ -28,6 +29,12 @@ export function McpGuide({ dashboardId }: { dashboardId?: string }) {
       <ol className="list-decimal space-y-2 pl-5"><li>Ask the agent to call get_blog and list_categories.</li><li>Create a category, then use its ID in create_posts with status draft.</li><li>Review the draft in the dashboard. Publish only after approval and with content:publish + content:write.</li></ol>
       <p>Tools cover posts, categories, tags, authors, image upload and blog metadata. Translations use separate posts linked by translationGroupId. New blogs, ownership, members, API keys and paid automatic translation remain dashboard-only.</p>
       <Link href="/docs/api/management" className="inline-block text-foreground underline underline-offset-4">REST endpoints, fields and permissions →</Link>
+    </CardContent></Card>
+    <Card><CardHeader><CardTitle>Rich content: every editor block</CardTitle><CardDescription>Agents use the same Editor.js JSON as the dashboard through create_posts and update_posts, over either transport.</CardDescription></CardHeader><CardContent className="space-y-4 text-sm text-muted-foreground">
+      <p>Ask the agent to call <code>get_editor_guide</code> for examples of paragraphs, headings, nested lists, quotes, code, tables, images, link cards, safe HTML and separators.</p>
+      <p>For a table with a bold, shaded header row, send this block inside <code>content.blocks</code>. Use <code>withHeadings: false</code> for a table without a header.</p>
+      <DocsCodeBlock language="json" code={JSON.stringify(editorGuide.blocks.find(block => block.type === "table")!.example, null, 2)} filename="Table block" />
+      <p><strong>Editing:</strong> supplying content replaces all blocks. Read the post first and preserve everything outside the requested edit. Raw HTML is sanitized; scripts and arbitrary iframes do not execute. Public blogs need the shared zenex-cms.css stylesheet or equivalent styles.</p>
     </CardContent></Card>
     <section className="space-y-3 text-sm text-muted-foreground"><h2 className="text-lg font-semibold text-foreground">Troubleshooting</h2>
       <p><strong>401:</strong> missing, expired or revoked key. <strong>403:</strong> missing scope, wrong blog or disallowed browser origin. <strong>429:</strong> wait 60 seconds. <strong>500:</strong> ask the operator to check database connectivity and apply the API-key migration.</p>
